@@ -1,0 +1,215 @@
+<div class="row">
+    <div class="col-lg-6">
+        <h4>Make the changes below</h4>
+        <p>We’re constantly trying to express ourselves and actualize our dreams. If you have the
+            opportunity to play.</p>
+    </div>
+    <div class="col-lg-6 text-right d-flex flex-column justify-content-center">
+        <button type="button" class="btn bg-gradient-primary mb-0 ms-lg-auto me-lg-0 me-auto mt-lg-0 mt-2">Save</button>
+    </div>
+</div>
+<div class="row mt-4">
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="font-weight-bolder">Product Image</h5>
+                <div class="row">
+                    <div class="col-12">
+                        <img class="w-100 mt-3" alt="product_image" src="/assets/img/iphone15-pro.png">
+                    </div>
+                    <div class="col-12 mt-4">
+                        <div class="d-flex">
+                            <button class="btn bg-gradient-primary btn-sm mb-0 me-2" type="button"
+                                name="button">Edit</button>
+                            <button class="btn btn-outline-dark btn-sm mb-0" type="button" name="button">Remove</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8 mt-lg-0 mt-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="font-weight-bolder">Product Information</h5>
+                <div class="row">
+                    <div class="col-12">
+                        <label for="name">Name</label>
+                        <input class="form-control" type="text" id="name" name="name"
+                            placeholder="eg. iPhone 15, iPhone 15 Plus, iPhone 15 Pro,..." onfocus="focused(this)"
+                            onfocusout="defocused(this)">
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col-6">
+                        <label for="theme">Theme</label>
+                        <div class="choices" data-type="select-one">
+                            <select class="form-control" id="theme" name="theme">
+                                <option value="1">Smart Phone</option>
+                                <option value="2">Charging Cable</option>
+                                <option value="3">Backup Charger</option>
+                                <option value="4">Earphone</option>
+                                <option value="4">Phone Case</option>
+                                <option value="4">Screen Protector</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <label for="category">Category</label>
+                        <div class="choices" data-type="select-one">
+                            <select class="form-control" id="category" name="category">
+                                <option value="1">Điện thoại iPhone</option>
+                                <option value="2">Điện thoại Samsung</option>
+                                <option value="3">Sạc Anker</option>
+                                <option value="3">Sạc Aukey</option>
+                                <option value="3">Sạc dự phòng Baseus</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col-6 col-sm-3">
+                        <label for="memory">Memory Storage</label>
+                        <div class="choices" data-type="select-one">
+                            <select class="form-control" id="memory" name="memory">
+                                <option value="64">64GB</option>
+                                <option value="128">128GB</option>
+                                <option value="256">256GB</option>
+                                <option value="512">512GB</option>
+                                <option value="1">1T</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <label for="battery">Battery Capacity</label>
+                        <div class="choices" data-type="select-one">
+                            <select class="form-control" id="battery" name="battery">
+                                <option value="5">5.000 mAh</option>
+                                <option value="10">10.000 mAh</option>
+                                <option value="20">20.000 mAh</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <label for="charge">Charging Capacity</label>
+                        <div class="choices" data-type="select-one">
+                            <select class="form-control" id="charge" name="charge">
+                                <option value="10">10W</option>
+                                <option value="10.5">10.5W</option>
+                                <option value="12">12W</option>
+                                <option value="15">15W</option>
+                                <option value="18">18W</option>
+                                <option value="20">20W</option>
+                                <option value="22.5">22.5W</option>
+                                <option value="25">25W</option>
+                                <option value="30">30W</option>
+                                <option value="60">60W</option>
+                                <option value="65">65W</option>
+                                <option value="100">100W</option>
+                                <option value="140">140W</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <label for="port">Charging Port</label>
+                        <div class="choices" data-type="select-one">
+                            <select class="form-control" id="port" name="port">
+                                <option value="1">Lightning</option>
+                                <option value="2">Type C</option>
+                                <option value="3">MagSafe</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mt-4">
+    <div class="col-sm-12 mt-sm-0 mt-4">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-lg-flex">
+                    <div class="col-6">
+                        <h5 class="font-weight-bolder">Pricing</h5>
+                    </div>
+                    <div class="ms-auto my-auto mt-lg-0 mt-4">
+                        <a href="#" class="btn bg-gradient-warning btn-sm mb-0">+&nbsp;Color</a>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col-3 col-sm-1">
+                        <img class="w-100 h-100 dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"
+                            alt="product_image" src="/assets/img/iphone15-pro.png">
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton"
+                            style="--bs-dropdown-min-width: 4rem;">
+                            <li>
+                                <a class="dropdown-item border-radius-md" href="javascript:;">Change</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item border-radius-md" href="javascript:;">Remove</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <label for="color">Color</label>
+                        <input class="form-control" type="text" id="color" name="color" onfocus="focused(this)"
+                            onfocusout="defocused(this)">
+                    </div>
+                    <div class="col-3 col-sm-3">
+                        <label>SKU</label>
+                        <input class="form-control" type="text" onfocus="focused(this)" onfocusout="defocused(this)">
+                    </div>
+                    <div class="col-12 col-sm-5">
+                        <label>Price (Use for Import Function)</label>
+                        <div class="d-flex">
+                            <span class="input-group-text"
+                                style="border-top-right-radius: 0; border-bottom-right-radius: 0">VND</span>
+                            <input class="form-control" type="text" onfocus="focused(this)" onfocusout="defocused(this)"
+                                id="name" name="name" placeholder="eg. 1000 ≡ 1 million"
+                                style="border-radius: 0; border-right: 0; border-left: 0; z-index: 1; text-align: end">
+                            <span class="input-group-text"
+                                style="border-top-left-radius: 0; border-bottom-left-radius: 0">,000</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col-3 col-sm-1">
+                        <img class="w-100 h-100 dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"
+                            alt="product_image" src="/assets/img/iphone15-pro.png">
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton"
+                            style="--bs-dropdown-min-width: 4rem;">
+                            <li>
+                                <a class="dropdown-item border-radius-md" href="javascript:;">Change</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item border-radius-md" href="javascript:;">Remove</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <label for="color">Color</label>
+                        <input class="form-control" type="text" id="color" name="color" onfocus="focused(this)"
+                            onfocusout="defocused(this)">
+                    </div>
+                    <div class="col-3 col-sm-3">
+                        <label>SKU</label>
+                        <input class="form-control" type="text" onfocus="focused(this)" onfocusout="defocused(this)">
+                    </div>
+                    <div class="col-12 col-sm-5">
+                        <label>Price (Use for Import Function)</label>
+                        <div class="d-flex">
+                            <span class="input-group-text"
+                                style="border-top-right-radius: 0; border-bottom-right-radius: 0">VND</span>
+                            <input class="form-control" type="text" onfocus="focused(this)" onfocusout="defocused(this)"
+                                id="name" name="name" placeholder="eg. 1000 ≡ 1 million"
+                                style="border-radius: 0; border-right: 0; border-left: 0; z-index: 1; text-align: end">
+                            <span class="input-group-text"
+                                style="border-top-left-radius: 0; border-bottom-left-radius: 0">,000</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
