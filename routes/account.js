@@ -12,7 +12,7 @@ router.get('/add', function(req, res, next) {
 });
 
 router.get('/profile', function(req, res, next) {
-  res.render('account-profile', { tittle: tittle, subTittle: 'Profile'});
+  res.render('account-profile', { tittle: "Profile", subTittle: 'Profile'});
 });
 
 module.exports = router;
