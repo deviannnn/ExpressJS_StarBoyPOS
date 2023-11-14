@@ -4,55 +4,39 @@ const path = require('path');
 const hbs = require('express-handlebars');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+const mongoose = require('mongoose');
 
-const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
-
-const specsRouter = require('./routes/specs');
-const themeRouter = require('./routes/theme');
-const categoryRouter = require('./routes/category');
-const productRouter = require('./routes/product');
-const purchaseRouter = require('./routes/purchase');
-
-const accountRouter = require('./routes/account');
-const supplierRouter = require('./routes/supplier');
-const customerRouter = require('./routes/customer');
+const dbConfig = require('./configs/database')
+const ratelimitConfig = require('./configs/ratelimit')
+const hbsConfig = require('./configs/handlebars');
+require('dotenv').config();
 
 const app = express();
 
+switch (app.get('env')) {
+  case 'development':
+    mongoose.connect(dbConfig.development.connectionString).then(() => console.log('Connected Development DB!'));
+    break;
+  case 'production':
+    mongoose.connect(dbConfig.production.connectionString).then(() => console.log('Connected Production DB!'));
+    break;
+  default:
+    throw new Error('Unknown execution environment ' + app.get('env'));
+}
+
 // view engine setup
-app.engine('handlebars', hbs.engine({
-  defaultLayout: 'layout',
-  helpers: {
-    add: function (a, b) {
-      return a + b;
-    },
-    isEqual: function (a, b, options) {
-      return (a === b) ? options.fn(this) : options.inverse(this);
-    }
-  }
-}));
+app.engine('handlebars', hbs(hbsConfig));
 app.set('view engine', 'handlebars');
 
+app.use(ratelimitConfig);
 app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+const indexRouter = require('./routes/index');
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
-
-app.use('/specs', specsRouter);
-app.use('/theme', themeRouter);
-app.use('/category', categoryRouter);
-app.use('/product', productRouter);
-app.use('/purchase', purchaseRouter);
-
-app.use('/account', accountRouter);
-app.use('/supplier', supplierRouter);
-app.use('/customer', customerRouter);
-
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
