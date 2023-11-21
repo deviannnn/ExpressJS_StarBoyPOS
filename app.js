@@ -1,15 +1,14 @@
 const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
-const hbs = require('express-handlebars');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const mongoose = require('mongoose');
+require('dotenv').config();
 
 const dbConfig = require('./configs/database')
 const ratelimitConfig = require('./configs/ratelimit')
 const hbsConfig = require('./configs/handlebars');
-require('dotenv').config();
 
 const app = express();
 
@@ -25,7 +24,7 @@ switch (app.get('env')) {
 }
 
 // view engine setup
-app.engine('handlebars', hbs(hbsConfig));
+app.engine('handlebars', hbsConfig.engine);
 app.set('view engine', 'handlebars');
 
 app.use(ratelimitConfig);

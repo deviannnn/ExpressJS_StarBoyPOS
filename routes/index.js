@@ -1,14 +1,22 @@
 var express = require('express');
 var router = express.Router();
 
-const specsRouter = require('./routes/specs');
-const themeRouter = require('./routes/theme');
-const categoryRouter = require('./routes/category');
-const productRouter = require('./routes/product');
-const purchaseRouter = require('./routes/purchase');
-const accountRouter = require('./routes/account');
-const supplierRouter = require('./routes/supplier');
-const customerRouter = require('./routes/customer');
+router.get('/', (req, res) => {
+    res.render('index')
+})
+
+router.get('/pos', (req, res) => {
+    res.render('pos', { layout: null, tittle: 'POS' })
+})
+
+const specsRouter = require('./specs');
+const themeRouter = require('./theme');
+const categoryRouter = require('./category');
+const productRouter = require('./product');
+const purchaseRouter = require('./purchase');
+const accountRouter = require('./account');
+const supplierRouter = require('./supplier');
+const customerRouter = require('./customer');
 
 router.use('/specs', specsRouter);
 router.use('/theme', themeRouter);

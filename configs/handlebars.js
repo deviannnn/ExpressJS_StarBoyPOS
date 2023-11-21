@@ -1,4 +1,6 @@
-const config = {
+const hbs = require('express-handlebars');
+
+const config  = hbs.create({
   defaultLayout: 'layout',
   helpers: {
     add: function (a, b) {
@@ -8,6 +10,6 @@ const config = {
       return a === b ? options.fn(this) : options.inverse(this);
     }
   }
-};
+});
 
 module.exports = config;
