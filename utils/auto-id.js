@@ -1,7 +1,7 @@
 const generateId = (prefix) => {
     const timestamp = Date.now().toString();
-    const randomNumbers = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-    return `${prefix}-${timestamp}-${randomNumbers}`;
+    const randomNum = Math.floor(1000 + Math.random() * 9000);
+    return `${prefix}-${timestamp}-${randomNum}`;
 };
 
-module.exports = generateId;
+module.exports = { generateId };

@@ -6,9 +6,9 @@ const generateJWT = async (account) => {
     try {
         const token = await jwt.sign(
             {
+                Id: account.Id,
                 email: account.email,
-                name: account.name,
-                store: account.store,
+                name: account.profile.name,
                 role: account.role
             },
             secretKey,
