@@ -4,16 +4,18 @@ const categorySchema = new mongoose.Schema({
     name: { type: String, required: true },
     specs: [{
         name: { type: String, required: false },
-        option: { type: String, required: false }
+        options: [{ type: String, required: false }]
     }],
     actived: { type: Boolean, required: true, default: true },
     created: {
-        datetime: { type: Date, default: Date.now },
-        createdBy: { type: String, required: true }
+        Id: { type: String, required: true, default: 'Init' },
+        name: { type: String, required: true, default: 'Init' },
+        datetime: { type: Date, required: true, default: Date.now },
     },
     updated: [{
-        datetime: { type: Date, default: Date.now },
-        updatedBy: { type: String, required: true }
+        Id: { type: String, required: true, default: 'Init' },
+        name: { type: String, required: true, default: 'Init' },
+        datetime: { type: Date, required: true, default: Date.now },
     }]
 });
 

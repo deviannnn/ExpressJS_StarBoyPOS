@@ -9,12 +9,14 @@ const productSchema = new mongoose.Schema({
     }],
     actived: { type: Boolean, required: true, default: true },
     created: {
-        datetime: { type: Date, default: Date.now },
-        createdBy: { type: String, required: true }
+        Id: { type: String, required: true, default: 'Init' },
+        name: { type: String, required: true, default: 'Init' },
+        datetime: { type: Date, required: true, default: Date.now },
     },
     updated: [{
-        datetime: { type: Date, default: Date.now },
-        updatedBy: { type: String, required: true }
+        Id: { type: String, required: true, default: 'Init' },
+        name: { type: String, required: true, default: 'Init' },
+        datetime: { type: Date, required: true, default: Date.now },
     }]
 });
 

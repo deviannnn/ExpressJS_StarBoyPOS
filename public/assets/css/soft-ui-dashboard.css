@@ -20045,23 +20045,33 @@ fieldset:disabled .btn {
     }
 }
 
-/*!
 
-=========================================================
-* Soft UI Dashboard Pro - v1.1.1
-=========================================================
+/* CUSTOM CSS */
+.options {
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    border-right: 0 !important;
+    z-index: 1;
+    text-align: end
+}
 
-* Product Page: https://www.creative-tim.com/product/soft-ui-dashboard-pro
-* Copyright 2023 Creative Tim (https://www.creative-tim.com)
-* Licensed under MIT (site.license)
+.delete-options {
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important
+}
 
-* Coded by www.creative-tim.com
+tbody img {
+    width: 50px;
+    height: 60px;
+    margin-left: 5px
+}
 
-=========================================================
+.product-img {
+    width: 50px;
+    height: 60px;
+}
+/* CUSTOM CSS */
 
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
 .alert-primary {
     background-image: linear-gradient(310deg, #7928ca, #d6006c)
 }

@@ -37,47 +37,165 @@
 </div>
 <div class="row mt-4">
     <div class="col-lg-4">
-        <div class="card h-100">
+        <div class="card">
+            <div class="card-header pb-0 px-3">
+                <h5 class="font-weight-bolder mb-0">Category Information</h5>
+            </div>
             <div class="card-body">
-                <h5 class="font-weight-bolder">Category Image</h5>
+                <label for="name">Name</label>
+                <input class="form-control" type="text" id="name" name="name" placeholder="eg. Smartphone, Laptop,...">
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-header pb-0 px-3">
+                <div class="row">
+                    <div class="col-6">
+                        <h5 class="font-weight-bolder mb-0">Included Specifications</h5>
+                        <p class="mb-0 text-sm">Optional informations</p>
+                    </div>
+                    <div class="col-6 ms-auto my-auto mt-lg-0 mt-4 text-end">
+                        <a href="" class="btn bg-gradient-warning btn-sm mb-0" data-bs-toggle="modal"
+                            data-bs-target="#addSpecModal">+&nbsp;Specification</a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body pt-4 p-3">
+                <ul class="list-group">
+                    <li class="list-group-item border-0 d-flex p-4 mb-2 bg-gray-100 border-radius-lg">
+                        <div class="d-flex flex-column">
+                            <h6 class="mb-3 text-sm">Memory Storage</h6>
+                            <span class="mb-2 text-xs">Options:
+                                <span class="text-dark font-weight-bold ms-sm-2">128GB, 256GB, 512GB, 1T</span>
+                            </span>
+                        </div>
+                        <div class="ms-auto text-end">
+                            <a class="btn btn-link text-danger text-gradient px-3 mb-0" href="javascript:;">
+                                <i class="far fa-trash-alt me-2" aria-hidden="true"></i>
+                                Delete
+                            </a>
+                            <a class="btn btn-link text-dark px-3 mb-0" href="javascript:;">
+                                <i class="fas fa-pencil-alt text-dark me-2" aria-hidden="true"></i>
+                                Edit
+                            </a>
+                        </div>
+                    </li>
+                    <li class="list-group-item border-0 d-flex p-4 mb-2 bg-gray-100 border-radius-lg">
+                        <div class="d-flex flex-column">
+                            <h6 class="mb-3 text-sm">Memory Storage</h6>
+                            <span class="mb-2 text-xs">Options:
+                                <span class="text-dark font-weight-bold ms-sm-2">128GB, 256GB, 512GB, 1T</span>
+                            </span>
+                        </div>
+                        <div class="ms-auto text-end">
+                            <a class="btn btn-link text-danger text-gradient px-3 mb-0" href="javascript:;"><i
+                                    class="far fa-trash-alt me-2" aria-hidden="true"></i>Delete</a>
+                            <a class="btn btn-link text-dark px-3 mb-0" href="javascript:;"><i
+                                    class="fas fa-pencil-alt text-dark me-2" aria-hidden="true"></i>Edit</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Add Spec -->
+<div class="modal fade" id="addSpecModal" tabindex="-1" role="dialog" style="--bs-modal-width: 800px;">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-bolder">New Specification</h5>
+                <a href="#" class="btn bg-gradient-success btn-sm mb-0 text-end">+&nbsp;Option</a>
+            </div>
+            <div class="modal-body mt-3 mb-1">
                 <div class="row">
                     <div class="col-12">
-                        <img class="w-100 mt-3" alt="product_image" src="/assets/img/iphone15-pro.png">
+                        <label>Specs Name</label>
+                        <input class="form-control" type="text" id="name" name="name"
+                            placeholder="eg. Memory Storage, Battery Capacity,...">
                     </div>
-                    <div class="col-12 mt-4">
+                </div>
+                <div class="row mt-3">
+                    <label>Options</label>
+                    <div class="col-4 mb-3">
                         <div class="d-flex">
-                            <button class="btn bg-gradient-primary btn-sm mb-0 me-2" type="button"
-                                name="button">Edit</button>
-                            <button class="btn btn-outline-dark btn-sm mb-0" type="button" name="button">Remove</button>
+                            <input class="form-control options" type="text" name="options">
+                            <a href="" class="input-group-text delete-options">
+                                <i class="fas fa-minus text-danger" aria-hidden="true"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-4 mb-3">
+                        <div class="d-flex">
+                            <input class="form-control options" type="text" name="options">
+                            <a href="" class="input-group-text delete-options">
+                                <i class="fas fa-minus text-danger" aria-hidden="true"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-4 mb-3">
+                        <div class="d-flex">
+                            <input class="form-control options" type="text" name="options">
+                            <a href="" class="input-group-text delete-options">
+                                <i class="fas fa-minus text-danger" aria-hidden="true"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-4 mb-3">
+                        <div class="d-flex">
+                            <input class="form-control options" type="text" name="options">
+                            <a href="" class="input-group-text delete-options">
+                                <i class="fas fa-minus text-danger" aria-hidden="true"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-4 mb-3">
+                        <div class="d-flex">
+                            <input class="form-control options" type="text" name="options">
+                            <a href="" class="input-group-text delete-options">
+                                <i class="fas fa-minus text-danger" aria-hidden="true"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-4 mb-3">
+                        <div class="d-flex">
+                            <input class="form-control options" type="text" name="options">
+                            <a href="" class="input-group-text delete-options">
+                                <i class="fas fa-minus text-danger" aria-hidden="true"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-4 mb-3">
+                        <div class="d-flex">
+                            <input class="form-control options" type="text" name="options">
+                            <a href="" class="input-group-text delete-options">
+                                <i class="fas fa-minus text-danger" aria-hidden="true"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-4 mb-3">
+                        <div class="d-flex">
+                            <input class="form-control options" type="text" name="options">
+                            <a href="" class="input-group-text delete-options">
+                                <i class="fas fa-minus text-danger" aria-hidden="true"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-4 mb-3">
+                        <div class="d-flex">
+                            <input class="form-control options" type="text" name="options">
+                            <a href="" class="input-group-text delete-options">
+                                <i class="fas fa-minus text-danger" aria-hidden="true"></i>
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-    <div class="col-lg-8 mt-lg-0 mt-4">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="font-weight-bolder">Category Information</h5>
-                <div>
-                    <label for="theme">Theme</label>
-                    <div class="choices" data-type="select-one">
-                        <select class="form-control" id="theme" name="theme">
-                            <option value="1">Smart Phone</option>
-                            <option value="2">Charging Cable</option>
-                            <option value="3">Backup Charger</option>
-                            <option value="4">Earphone</option>
-                            <option value="4">Phone Case</option>
-                            <option value="4">Screen Protector</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <label for="name">Name</label>
-                    <input class="form-control" type="text" id="name" name="name"
-                        placeholder="eg. iPhone, Samsung, Anker, Aukey,..." onfocus="focused(this)"
-                        onfocusout="defocused(this)">
-                </div>
+            <div class="modal-footer">
+                <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn bg-gradient-dark" id="next-edit-btn">Next</button>
             </div>
         </div>
     </div>
