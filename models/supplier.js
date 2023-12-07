@@ -9,12 +9,14 @@ const supplierSchema = new mongoose.Schema({
     bankNum: { type: String, required: true },
     actived: { type: Boolean, required: true, default: true },
     created: {
-        datetime: { type: Date, default: Date.now },
-        createdBy: { type: String, required: true }
+        Id: { type: String, required: true },
+        name: { type: String, required: true },
+        datetime: { type: Date, required: true, default: Date.now },
     },
     updated: [{
-        datetime: { type: Date, default: Date.now },
-        updatedBy: { type: String, required: true }
+        Id: { type: String, required: true },
+        name: { type: String, required: true },
+        datetime: { type: Date, required: true, default: Date.now },
     }]
 });
 

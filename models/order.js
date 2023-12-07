@@ -2,9 +2,20 @@ const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema({
     Id: { type: String, unique: true, required: true },
-    customer: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer', required: true },
-    cashier: { type: mongoose.Schema.Types.ObjectId, ref: 'Account', required: true },
-    totalAmount: { type: Number, required: true },
+    customer: {
+        Id: { type: String, unique: true, required: true, default: 'WG' },
+        name: { type: String, unique: true, required: true, default: 'Walk-in Guest' }
+    },
+    cashier: {
+        Id: { type: String, unique: true, required: true },
+        name: { type: String, unique: true, required: true }
+    },
+    summaryAmount: {
+        subTotal: { type: Number, required: true },
+        discount: { type: Number, default: 0 },
+        voucher: { type: Number, default: 0 },
+        totalAmount: { type: Number, required: true }
+    },
     items: [{
         product: { type: mongoose.Schema.Types.ObjectId, ref: 'Variant', required: true },
         quantity: { type: Number, required: true },
@@ -20,8 +31,9 @@ const orderSchema = new mongoose.Schema({
     },
     created: { type: Date, default: Date.now },
     updated: [{
-        datetime: { type: Date, default: Date.now },
-        updatedBy: { type: String, required: true }
+        Id: { type: String, required: true },
+        name: { type: String, required: true },
+        datetime: { type: Date, required: true, default: Date.now },
     }]
 });
 

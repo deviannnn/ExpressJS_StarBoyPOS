@@ -29,7 +29,7 @@ const register = async (req, res) => {
 
         await newAccount.save();
 
-        return res.status(201).json({ success: true, message: 'Account registered successfully.' });
+        return res.status(201).json({ success: true, title: 'Registed!', message: 'Account registered successfully.' });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
@@ -125,7 +125,7 @@ const update = async (req, res) => {
             { new: true }
         );
 
-        return res.status(200).json({ success: true, account: updatedAccount });
+        return res.status(200).json({ success: true, title: 'Updated!', message: 'Account updated successfully.', account: updatedAccount });
     } catch (error) {
         console.log(error.message);
         return res.status(500).json({ success: false, message: 'Internal Server Error' });
@@ -142,7 +142,7 @@ const remove = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Account not found.' });
         }
 
-        return res.status(200).json({ success: true, account: deletedAccount });
+        return res.status(200).json({ success: true, title: 'Deleted!', message: 'Account deleted successfully.' });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
@@ -168,7 +168,7 @@ const changePassword = async (req, res) => {
 
         await account.save();
 
-        return res.status(200).json({ success: true, message: 'Password updated successfully.' });
+        return res.status(200).json({ success: true, message: 'Password changed successfully.' });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
@@ -197,7 +197,7 @@ const shouldSkipUpdate = (inputFields, existingAccount) => {
         role: existingAccount.role,
         locked: existingAccount.locked
     }
-    
+
     return Object.entries(fieldsToUpdate).every(([key, value]) => {
         return convert[key] === value;
     });

@@ -15,20 +15,20 @@ const variantSchema = new mongoose.Schema({
         enum: ['new', 'in stock', 'out of stock', 'warning'],
         default: 'new'
     },
-    quantityHistory: [{
-        datetime: { type: Date, default: Date.now },
+    timeline: [{
         quantity: { type: Number, required: true },
-        updatedBy: { type: String, enum: ['sell', 'import'], required: true }
+        action: { type: String, enum: ['sell', 'import'], required: true },
+        datetime: { type: Date, default: Date.now }
     }],
     actived: { type: Boolean, required: true, default: true },
     created: {
-        Id: { type: String, required: true, default: 'Init' },
-        name: { type: String, required: true, default: 'Init' },
+        Id: { type: String, required: true },
+        name: { type: String, required: true },
         datetime: { type: Date, required: true, default: Date.now },
     },
     updated: [{
-        Id: { type: String, required: true, default: 'Init' },
-        name: { type: String, required: true, default: 'Init' },
+        Id: { type: String, required: true },
+        name: { type: String, required: true },
         datetime: { type: Date, required: true, default: Date.now },
     }]
 });
