@@ -1,5 +1,6 @@
 const { validationResult, check } = require('express-validator');
 const Account = require('../models/account');
+const Variant = require('../models/variant');
 
 const checkRegister = [
     check('email')
@@ -40,19 +41,24 @@ const checkRegister = [
         }),
 
     check('num')
-        .not().isEmpty().withMessage('Address number cannot be empty.'),
+        .not().isEmpty().withMessage('Address number cannot be empty.')
+        .isString().withMessage('Invalid address number value.'),
 
     check('street')
-        .not().isEmpty().withMessage('Street cannot be empty.'),
+        .not().isEmpty().withMessage('Street cannot be empty.')
+        .isString().withMessage('Invalid street value'),
 
     check('ward')
-        .not().isEmpty().withMessage('Ward cannot be empty.'),
+        .not().isEmpty().withMessage('Ward cannot be empty.')
+        .isString().withMessage('Invalid ward value.'),
 
     check('district')
-        .not().isEmpty().withMessage('District cannot be empty.'),
+        .not().isEmpty().withMessage('District cannot be empty.')
+        .isString().withMessage('Invalid district value.'),
 
     check('city')
-        .not().isEmpty().withMessage('City cannot be empty.'),
+        .not().isEmpty().withMessage('City cannot be empty.')
+        .isString().withMessage('Invalid city value.'),
 ];
 
 const checkUAccount = [
@@ -104,23 +110,28 @@ const checkUAccount = [
 
     check('num')
         .optional()
-        .not().isEmpty().withMessage('Address number cannot be empty.'),
+        .not().isEmpty().withMessage('Address number cannot be empty.')
+        .isString().withMessage('Invalid address number value.'),
 
     check('street')
         .optional()
-        .not().isEmpty().withMessage('Street cannot be empty.'),
+        .not().isEmpty().withMessage('Street cannot be empty.')
+        .isString().withMessage('Invalid street value'),
 
     check('ward')
         .optional()
-        .not().isEmpty().withMessage('Ward cannot be empty.'),
+        .not().isEmpty().withMessage('Ward cannot be empty.')
+        .isString().withMessage('Invalid ward value.'),
 
     check('district')
         .optional()
-        .not().isEmpty().withMessage('District cannot be empty.'),
+        .not().isEmpty().withMessage('District cannot be empty.')
+        .isString().withMessage('Invalid district value.'),
 
     check('city')
         .optional()
-        .not().isEmpty().withMessage('City cannot be empty.'),
+        .not().isEmpty().withMessage('City cannot be empty.')
+        .isString().withMessage('Invalid city value.'),
 
     check('role')
         .optional()
@@ -132,10 +143,6 @@ const checkUAccount = [
 ];
 
 const checkNameCategory = [
-    check('categoryId')
-        .not().isEmpty().withMessage('Category cannot be empty.')
-        .isMongoId().withMessage('Invalid category ID.'),
-
     check('name')
         .not().isEmpty().withMessage('Category\'s name cannot be empty.')
         .matches(/^[\p{L}\s]*$/u).withMessage('Category\'s name should only contain letters and spaces.'),
@@ -147,8 +154,8 @@ const checkSpecsCategory = [
         .isMongoId().withMessage('Invalid category ID.'),
 
     check('name')
-        .isString().withMessage('Invalid specification name.')
-        .matches(/^[\p{L}\s]+$/u).withMessage('Invalid specification name format. It should only contain letters and spaces.'),
+        .not().isEmpty().withMessage('Specification\'s name cannot be empty.')
+        .matches(/^[\p{L}\s]*$/u).withMessage('Specification\'s name should only contain letters and spaces.'),
 
     check('options')
         .isArray().withMessage('Invalid options array.')
@@ -173,7 +180,8 @@ const checkProduct = [
         .isMongoId().withMessage('Invalid category ID.'),
 
     check('name')
-        .not().isEmpty().withMessage('Product\'s name cannot be empty.'),
+        .not().isEmpty().withMessage('Product\'s name cannot be empty.')
+        .isString().withMessage('Product\'s color must be a string.'),
 
     check('specs')
         .optional()
@@ -198,13 +206,123 @@ const checkProduct = [
 ];
 
 const checkUProduct = [
+    check('productId')
+        .optional()
+        .not().isEmpty().withMessage('Product ID cannot be empty.')
+        .isMongoId().withMessage('Invalid product ID.'),
+
     check('categoryId')
-        .not().isEmpty().withMessage('Category cannot be empty.')
+        .optional()
+        .not().isEmpty().withMessage('Category ID cannot be empty.')
         .isMongoId().withMessage('Invalid category ID.'),
 
     check('name')
         .optional()
         .not().isEmpty().withMessage('Product\'s name cannot be empty.')
+        .isString().withMessage('Product\'s color must be a string.'),
+
+    check('specs')
+        .optional()
+        .isArray().withMessage('Invalid specifications.')
+        .custom((specs, { req }) => {
+            if (!Array.isArray(specs) || specs.length === 0) {
+                throw new Error('Specifications are required.');
+            }
+
+            specs.forEach((spec, index) => {
+                if (!spec.name || typeof spec.name !== 'string' || !/^[\p{L}\s]+$/u.test(spec.name.trim())) {
+                    throw new Error('Invalid specification name format. It should only contain letters and spaces.');
+                }
+
+                if (!spec.option || typeof spec.option !== 'string' || spec.option.trim() === '') {
+                    throw new Error(`Invalid option at index ${index}. Options should be strings.`);
+                }
+            });
+
+            return true;
+        }),
+
+    check('actived')
+        .optional()
+        .isBoolean().withMessage('Invalid actived value.')
+];
+
+const checkVariant = [
+    check('productId')
+        .not().isEmpty().withMessage('Product cannot be empty.')
+        .isMongoId().withMessage('Invalid product ID.'),
+
+    check('barcode')
+        .not().isEmpty().withMessage('Barcode cannot be empty.')
+        .isString().withMessage('Barcode must be a string.')
+        .custom(async (value) => {
+            if (value) {
+                const existingVariant = await Variant.findOne({ barcode: value });
+                if (existingVariant) {
+                    throw new Error('Barcode already exists.');
+                }
+            }
+        }),
+
+    check('color')
+        .not().isEmpty().withMessage('Product Variant\'s color cannot be empty.')
+        .isString().withMessage('Product Variant\'s color must be a string.'),
+
+    check('cost')
+        .not().isEmpty().withMessage('Cost cannot be empty.')
+        .isNumeric().withMessage('Cost must be a number.'),
+
+    check('price')
+        .not().isEmpty().withMessage('Price cannot be empty.')
+        .isNumeric().withMessage('Price must be a number.'),
+
+    check('warn')
+        .not().isEmpty().withMessage('Warn cannot be empty.')
+        .isNumeric().withMessage('Warn must be a number.')
+];
+
+const checkUVariant = [
+    check('productId')
+        .optional()
+        .not().isEmpty().withMessage('Product cannot be empty.')
+        .isMongoId().withMessage('Invalid product ID.'),
+
+    check('newbarcode')
+        .optional()
+        .not().isEmpty().withMessage('Barcode cannot be empty.')
+        .custom(async (value, { req }) => {
+            if (value === req.body.barcode) return true;
+            if (value) {
+                const existingVariant = await Variant.findOne({ barcode: value });
+                if (existingVariant) {
+                    throw new Error('Barcode already exists.');
+                }
+            }
+            return true
+        }),
+
+    check('color')
+        .optional()
+        .not().isEmpty().withMessage('Product Variant\'s color cannot be empty.'),
+
+    check('cost')
+        .optional()
+        .not().isEmpty().withMessage('Cost cannot be empty.')
+        .isNumeric().withMessage('Cost must be a number.'),
+
+    check('price')
+        .optional()
+        .not().isEmpty().withMessage('Price cannot be empty.')
+        .isNumeric().withMessage('Price must be a number.'),
+
+    check('warn')
+        .optional()
+        .not().isEmpty().withMessage('Warn cannot be empty.')
+        .isNumeric().withMessage('Warn must be a number.'),
+
+    check('actived')
+        .optional()
+        .isBoolean().withMessage('Invalid actived value.')
 ];
 
 function validate(req, res, next) {
@@ -216,4 +334,7 @@ function validate(req, res, next) {
     next();
 }
 
-module.exports = { validate, checkRegister, checkUAccount, checkNameCategory, checkSpecsCategory, checkProduct, checkUProduct };
+module.exports = {
+    validate, checkRegister, checkUAccount, checkNameCategory, checkSpecsCategory, checkProduct,
+    checkUProduct, checkVariant, checkUVariant
+};

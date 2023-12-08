@@ -9,15 +9,9 @@ const variantSchema = new mongoose.Schema({
     cost: { type: Number, required: true },
     price: { type: Number, required: true },
     warn: { type: Number, required: false },
-    status: {
-        type: String,
-        required: true,
-        enum: ['new', 'in stock', 'out of stock', 'warning'],
-        default: 'new'
-    },
     timeline: [{
         quantity: { type: Number, required: true },
-        action: { type: String, enum: ['sell', 'import'], required: true },
+        action: { type: String, enum: ['sell', 'import', 'editing'], required: true },
         datetime: { type: Date, default: Date.now }
     }],
     actived: { type: Boolean, required: true, default: true },
@@ -32,6 +26,20 @@ const variantSchema = new mongoose.Schema({
         datetime: { type: Date, required: true, default: Date.now },
     }]
 });
+
+variantSchema.methods.getStatus = function () {
+    if (this.timeline.length === 0) {
+        return 'new';
+    } else {
+        if (this.quantity === 0) {
+            return 'out of stock';
+        } else if (this.quantity < this.warn) {
+            return 'warning';
+        } else {
+            return 'in stock';
+        }
+    }
+};
 
 const Variant = mongoose.model('Variant', variantSchema);
 

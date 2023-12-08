@@ -67,12 +67,12 @@ const getByID = async (req, res) => {
     const { Id } = req.body;
 
     try {
-        const existingAccount = await Account.findOne({ Id });
-        if (!existingAccount) {
+        const account = await Account.findOne({ Id });
+        if (!account) {
             return res.status(400).json({ success: false, message: 'Account not found.' });
         }
 
-        return res.status(200).json({ success: true, account: existingAccount });
+        return res.status(200).json({ success: true, account: account });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
@@ -142,7 +142,7 @@ const remove = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Account not found.' });
         }
 
-        return res.status(200).json({ success: true, title: 'Deleted!', message: 'Account deleted successfully.' });
+        return res.status(200).json({ success: true, title: 'Deleted!', message: 'Account deleted successfully.', account: deletedAccount });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Internal Server Error' });
     }

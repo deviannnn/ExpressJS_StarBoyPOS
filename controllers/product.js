@@ -1,10 +1,11 @@
 const mongoose = require('mongoose');
 const Product = require('../models/product');
 const Category = require('../models/category');
+const Variant = require('../models/variant');
 
 const create = async (req, res) => {
     const { categoryId, name, specs } = req.body;
-    
+
     try {
         const existingCategory = await Category.findOne({ _id: categoryId });
         if (!existingCategory) {
@@ -43,41 +44,71 @@ const getByID = async (req, res) => {
     const { productId } = req.body;
 
     try {
-        const existingProduct = await Product.findOne({ _id: productId });
-        if (!existingProduct) {
+        const product = await Product.findOne({ _id: productId });
+        if (!product) {
             return res.status(400).json({ success: false, message: 'Product not found.' });
         }
 
-        return res.status(200).json({ success: true, product: existingProduct });
+        return res.status(200).json({ success: true, product: product });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
 }
 
 const update = async (req, res) => {
-    const { categoryId, name, specs, actived } = req.body;
+    let { productId, categoryId, name, specs, actived } = req.body;
 
     try {
-        const product = await Product.findOne({ _id: productId });
-        if (!product) {
+        const updatedProduct = await Product.findOne({ _id: productId });
+        if (!updatedProduct) {
             return res.status(400).json({ success: false, message: 'Product not found.' });
         }
 
-        if (name === product.name) {
+        const removeIdsFromSpecs = (specs) => {
+            return specs.map(spec => {
+                const { _id, name, option } = spec;
+                return { name, option };
+            });
+        };
+
+        let diff = false;
+        if (categoryId !== undefined && categoryId !== updatedProduct.category.toString()) {
+            const existingCategory = await Category.findOne({ _id: categoryId });
+            if (!existingCategory) {
+                return res.status(400).json({ success: false, message: 'Category not found.' });
+            }
+
+            updatedProduct.category = new mongoose.Types.ObjectId(categoryId);
+            diff = true;
+        }
+        if (name !== undefined && name !== updatedProduct.name) {
+            updatedProduct.name = name;
+            diff = true;
+        }
+        if (specs !== undefined && JSON.stringify(specs) !== JSON.stringify(removeIdsFromSpecs(updatedProduct.specs))) {
+            updatedProduct.specs = specs;
+            diff = true;
+        }
+        if (actived !== undefined && actived !== updatedProduct.actived) {
+            updatedProduct.actived = actived;
+            diff = true;
+        }
+
+        if (!diff) {
             return res.status(400).json({ success: false, message: 'Nothing to update.' });
         }
 
-        product.name = name;
-        product.updated.push({
+        updatedProduct.updated.push({
             Id: req.user.Id,
             name: req.user.name,
             datetime: Date.now(),
         });
 
-        await product.save();
+        await updatedProduct.save();
 
-        return res.status(200).json({ success: true, title: 'Updated!', message: 'Product\'s name updated successfully.' });
+        return res.status(200).json({ success: true, title: 'Updated!', message: 'Product updated successfully.', product: updatedProduct });
     } catch (error) {
+        console.log(error.message)
         return res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
 };
@@ -101,30 +132,59 @@ const remove = async (req, res) => {
 const goHandleView = async (req, res, next) => {
     const doAction = req.query.do;
 
-    if (doAction === 'add') {
-        res.render('product-handle', { title: 'Products', subTitle: 'New Product' });
-    } else if (doAction === 'edit') {
-        const productId = req.query.id;
+    try {
+        const listCategories = await Category.find();
 
-        try {
+        const categories = listCategories.map(category => ({
+            id: category._id.toString().trim(),
+            name: category.name,
+            specs: category.specs.map(spec => ({
+                name: spec.name,
+                options: spec.options.map(option => option.toString())
+            }))
+        }))
+
+        if (doAction === 'add') {
+            res.render('product-handle', { title: 'Products', subTitle: 'New Product', categories: categories });
+        } else if (doAction === 'edit') {
+            const productId = req.query.id;
+
             const editProduct = await Product.findOne({ _id: productId });
             if (!editProduct) {
                 return next();
             }
-            const id = editProduct._id.toString();
-            const specs = editProduct.specs.map(spec => ({
-                name: spec.name,
-                options: spec.options.map(option => option.toString()),
-                id: spec._id.toString()
-            }));
-            const product = { id, name: editProduct.name, specs };
-            res.render('product-handle', { title: 'Products', subTitle: 'Edit Product', product: product });
-        } catch (error) {
-            return next();
-        }
 
-    } else {
-        res.render('product-handle', { title: 'Products', subTitle: 'New Product' });
+            const product = {
+                id: editProduct._id.toString().trim(),
+                category: editProduct.category.toString().trim(),
+                name: editProduct.name,
+                specs: editProduct.specs.map(spec => ({
+                    name: spec.name,
+                    option: spec.option,
+                    id: spec._id.toString().trim()
+                }))
+            };
+
+            let variants = await Variant.find({ product: productId });
+            if (variants.length !== 0) {
+                variants = variants.map((variant) => ({
+                    barcode: variant.barcode,
+                    img: variant.img,
+                    color: variant.color,
+                    quantity: variant.quantity,
+                    cost: variant.cost,
+                    price: variant.price,
+                    warn: variant.warn,
+                    actived: variant.actived
+                }))
+            }
+
+            res.render('product-handle', { title: 'Products', subTitle: 'Edit Product', categories: categories, product: product, variants: variants });
+        } else {
+            res.render('product-handle', { title: 'Products', subTitle: 'New Product', categories: categories });
+        }
+    } catch (error) {
+        return next();
     }
 }
 

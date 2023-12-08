@@ -9,13 +9,13 @@ const title = 'Accounts';
 
 router.post('/login', accountController.login);
 
-router.use(authenticate);
+// router.use(authenticate);
 
 router.get('/profile', function (req, res) {
   res.render('account-profile', { title: "Profile", subTitle: 'Profile' });
 });
 
-router.use(isAdmin);
+// router.use(isAdmin);
 
 router.get('/', function (req, res) {
   res.render('account', { title: title, subTitle: 'Account List' });

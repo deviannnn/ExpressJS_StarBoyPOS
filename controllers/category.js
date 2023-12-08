@@ -34,12 +34,12 @@ const getByID = async (req, res) => {
     const { categoryId } = req.body;
 
     try {
-        const existingCategory = await Category.findOne({ _id: categoryId });
-        if (!existingCategory) {
+        const category = await Category.findOne({ _id: categoryId });
+        if (!category) {
             return res.status(400).json({ success: false, message: 'Category not found.' });
         }
 
-        return res.status(200).json({ success: true, category: existingCategory });
+        return res.status(200).json({ success: true, category: category });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
@@ -49,25 +49,25 @@ const updateName = async (req, res) => {
     const { categoryId, name } = req.body;
 
     try {
-        const category = await Category.findOne({ _id: categoryId });
-        if (!category) {
+        const updatedCategory = await Category.findOne({ _id: categoryId });
+        if (!updatedCategory) {
             return res.status(400).json({ success: false, message: 'Category not found.' });
         }
 
-        if (name === category.name) {
+        if (name === updatedCategory.name) {
             return res.status(400).json({ success: false, message: 'Nothing to update.' });
         }
 
-        category.name = name;
-        category.updated.push({
+        updatedCategory.name = name;
+        updatedCategory.updated.push({
             Id: req.user.Id,
             name: req.user.name,
             datetime: Date.now(),
         });
 
-        await category.save();
+        await updatedCategory.save();
 
-        return res.status(200).json({ success: true, title: 'Updated!', message: 'Category\'s name updated successfully.' });
+        return res.status(200).json({ success: true, title: 'Updated!', message: 'Category\'s name updated successfully.', category: updatedCategory });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
@@ -93,16 +93,16 @@ const addSpecs = async (req, res) => {
     const { categoryId, name, options } = req.body;
 
     try {
-        const addSpecsCategory = await Category.findOne({ _id: categoryId });
-        if (!addSpecsCategory) {
+        const asCategory = await Category.findOne({ _id: categoryId });
+        if (!asCategory) {
             return res.status(400).json({ success: false, message: 'Category not found.' });
         }
 
-        addSpecsCategory.specs.push({ name, options });
+        asCategory.specs.push({ name, options });
 
-        await addSpecsCategory.save();
+        await asCategory.save();
 
-        return res.status(200).json({ success: true, title: 'Added!', message: 'Specification added successfully.', category: addSpecsCategory });
+        return res.status(200).json({ success: true, title: 'Added!', message: 'Specification added successfully.', category: asCategory });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
@@ -112,34 +112,34 @@ const updateSpecs = async (req, res) => {
     const { categoryId, specId, name, options } = req.body;
 
     try {
-        const category = await Category.findOne({ _id: categoryId });
-        if (!category) {
+        const usCategory = await Category.findOne({ _id: categoryId });
+        if (!usCategory) {
             return res.status(400).json({ success: false, message: 'Category not found.' });
         }
 
-        const specIndex = category.specs.findIndex(spec => spec._id.toString() === specId);
+        const specIndex = usCategory.specs.findIndex(spec => spec._id.toString() === specId);
         if (specIndex === -1) {
             return res.status(404).json({ success: false, message: 'Specification not found.' });
         }
 
-        const oldName = category.specs[specIndex].name;
-        const oldOptions = category.specs[specIndex].options;
+        const oldName = usCategory.specs[specIndex].name;
+        const oldOptions = usCategory.specs[specIndex].options;
         if (name === oldName && JSON.stringify(options) === JSON.stringify(oldOptions)) {
             return res.status(400).json({ success: false, message: 'Nothing to update.' });
         }
 
-        category.specs[specIndex].name = name;
-        category.specs[specIndex].options = options;
+        usCategory.specs[specIndex].name = name;
+        usCategory.specs[specIndex].options = options;
 
-        category.updated.push({
+        usCategory.updated.push({
             Id: req.user.Id,
             name: req.user.name,
             datetime: Date.now(),
         });
 
-        await category.save();
+        await usCategory.save();
 
-        return res.status(200).json({ success: true, title: 'Updated!', message: 'Specification updated successfully.', category: category });
+        return res.status(200).json({ success: true, title: 'Updated!', message: 'Specification updated successfully.', category: usCategory });
     } catch (error) {
         console.log(error.message)
         return res.status(500).json({ success: false, message: 'Internal Server Error' });
@@ -150,26 +150,26 @@ const removeSpecs = async (req, res) => {
     const { categoryId, specId } = req.body;
 
     try {
-        const category = await Category.findOne({ _id: categoryId });
-        if (!category) {
+        const rsCategory = await Category.findOne({ _id: categoryId });
+        if (!rsCategory) {
             return res.status(400).json({ success: false, message: 'Category not found.' });
         }
 
-        const specIndex = category.specs.findIndex(spec => spec._id.toString() === specId);
+        const specIndex = rsCategory.specs.findIndex(spec => spec._id.toString() === specId);
         if (specIndex === -1) {
             return res.status(404).json({ success: false, message: 'Specification not found.' });
         }
 
-        category.specs.splice(specIndex, 1);
-        category.updated.push({
+        rsCategory.specs.splice(specIndex, 1);
+        rsCategory.updated.push({
             Id: req.user.Id,
             name: req.user.name,
             datetime: Date.now(),
         });
 
-        await category.save();
+        await rsCategory.save();
 
-        return res.status(200).json({ success: true, title: 'Deleted!', message: 'Specification deleted successfully.' });
+        return res.status(200).json({ success: true, title: 'Deleted!', message: 'Specification deleted successfully.', category: rsCategory });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Internal Server Error' });
     }

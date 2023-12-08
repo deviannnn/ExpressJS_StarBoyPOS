@@ -32,7 +32,10 @@ app.engine('handlebars', hbs.engine({
     },
     isEqual: function (a, b, options) {
       return a === b ? options.fn(this) : options.inverse(this);
-    }
+    },
+    eq: function (a, b) {
+      return a === b;
+    },
   }
 }));
 app.set('view engine', 'handlebars');

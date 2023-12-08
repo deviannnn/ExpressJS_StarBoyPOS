@@ -7,24 +7,28 @@ const { authenticate, isAdmin } = require('../middlewares/auth');
 
 const title = 'Products';
 
-router.use(authenticate);
+router.get('/handle', productController.goHandleView);
 
 router.get('/', function (req, res, next) {
   res.render('product', { title: title, subTitle: 'Product List' });
 });
 
+router.use(authenticate);
+
+
+
 router.use(isAdmin);
 
-router.get('/handle', productController.goHandleView);
+
 
 router.post('/getAll', productController.getAll);
 
-router.post('/get', productController.getByID);
+router.post('/get', [checkUProduct, validate], productController.getByID);
 
 router.post('/create', [checkProduct, validate], productController.create);
 
 router.put('/update', [checkUProduct, validate], productController.update);
 
-router.delete('/remove', productController.remove);
+router.delete('/remove', [checkUProduct, validate], productController.remove);
 
 module.exports = router;

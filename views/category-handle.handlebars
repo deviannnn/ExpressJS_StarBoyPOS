@@ -18,7 +18,7 @@
                     </div>
                     <div class="modal-body">
                         <p>After you verify this message, the system will create a new category.
-                            You can then edit the specifications included of this one.</p>
+                            You can then add or edit the specifications included of this one.</p>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn bg-gradient-success" data-bs-dismiss="modal"
@@ -40,7 +40,7 @@
             </div>
             <div class="card-body">
                 {{#if category}}
-                <input id="id" hidden value="{{category.id}}">
+                <input id="categoryId" hidden value="{{category.id}}">
                 {{/if}}
 
                 <label for="name">Name</label>
@@ -103,7 +103,7 @@
                     {{/each}}
                     {{else}}
                     <div class="alert alert-light m-0" role="alert">
-                        <strong>Ooops!</strong> There aren't any specifications!
+                        <strong>Ooops!</strong> There aren't any specifications yet!
                     </div>
                     {{/if}}
                 </ul>
@@ -113,6 +113,7 @@
     {{/if}}
 </div>
 
+{{#if category}}
 <!-- Modal Add Spec -->
 <div class="modal fade" id="create-specs" tabindex="-1" role="dialog" style="--bs-modal-width: 800px;">
     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -212,6 +213,7 @@
         </div>
     </div>
 </div>
+{{/if}}
 
 <script>
     $('#next-cate').click(() => {
@@ -219,9 +221,7 @@
     });
 
     $('#confirm-cate').click(() => {
-        $('#specs-area').show();
-        $('#edit-name-cate').show();
-        $('#next-cate').hide();
+        window.location.href = '/category/handle?do=edit&id=6571cf6e7edda196e162f2f2'
     });
 
     $('#edit-name-cate').click(() => {
