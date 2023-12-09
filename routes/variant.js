@@ -10,13 +10,19 @@ router.use(authenticate);
 
 router.use(isAdmin);
 
-router.post('/getAllByProduct', [checkUVariant, validate], variantController.getAllByProductID);
+router.post('/getAllByProduct', variantController.getAllByProductID);
 
 router.post('/getByBarcode', variantController.getByBarcode);
 
-router.post('/create', upload.single('img'), [checkVariant, validate], variantController.create);
+const setRootFolder = (req, res, next) => {
+    req.root = {};
+    req.root.folder = 'product_variants';
+    next();
+}
 
-router.put('/update', upload.single('img'), [checkUVariant, validate], variantController.update);
+router.post('/create', [checkVariant, validate], setRootFolder, upload.single('img'), variantController.create);
+
+router.put('/update', [checkUVariant, validate], setRootFolder, upload.single('img'), variantController.update);
 
 router.delete('/remove', variantController.remove);
 

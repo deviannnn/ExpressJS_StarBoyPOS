@@ -1,5 +1,7 @@
 const Account = require('../models/account');
 const bcrypt = require('bcrypt');
+const get = require('lodash/get');
+const set = require('lodash/set');
 const { generateJWT } = require('../utils/jwt');
 const { generateId } = require('../utils/auto-id');
 
@@ -21,10 +23,10 @@ const register = async (req, res) => {
                 address: { num: num, street: street, ward: ward, district: district, city: city },
                 avatar: 'default.png'
             },
-            created: {
-                Id: req.user.Id,
-                name: req.user.name
-            }
+            // created: {
+            //     Id: req.user.Id,
+            //     name: req.user.name
+            // }
         });
 
         await newAccount.save();
@@ -82,48 +84,49 @@ const update = async (req, res) => {
     const { Id, email, name, gender, birthday, phone, num, street, ward, district, city, role, locked } = req.body;
 
     try {
-        const existingAccount = await Account.findOne({ Id });
-        if (!existingAccount) {
-            return res.status(400).json({ success: false, message: 'Account not found.' });
+        const updatedAccount = await Account.findOne({ Id });
+
+        let diff = false;
+        const updateFields = {
+            email,
+            'profile.name': name,
+            'profile.gender': gender,
+            'profile.phone': phone,
+            'profile.address.num': num,
+            'profile.address.street': street,
+            'profile.address.ward': ward,
+            'profile.address.district': district,
+            'profile.address.city': city,
+            role,
+            locked,
+        };
+
+        for (const [key, value] of Object.entries(updateFields)) {
+            if (value !== undefined && value !== get(updatedAccount, key)) {
+                set(updatedAccount, key, value);
+                diff = true;
+            }
+        }
+        if (birthday !== undefined && birthday !== updatedAccount.profile.birthday.toISOString().slice(0, 10)) {
+            updatedAccount.profile.birthday = birthday;
+            diff = true;
+        }
+        if (req.file !== undefined) {
+            updatedAccount.profile.avatar = req.file.filename;
+            diff = true;
         }
 
-        if (shouldSkipUpdate({ email, name, gender, birthday, phone, num, street, ward, district, city, role, locked }, existingAccount)) {
+        if (!diff) {
             return res.status(400).json({ success: false, message: 'Nothing to update.' });
         }
 
-        const replaceUndefined = (value, defaultValue) => (value !== undefined ? value : defaultValue);
+        updatedAccount.updated.push({
+            Id: req.user.Id,
+            name: req.user.name,
+            datetime: Date.now(),
+        });
 
-        const updatedAccount = await Account.findOneAndUpdate(
-            { Id },
-            {
-                $addToSet: {
-                    updated: {
-                        Id: req.user.Id,
-                        name: req.user.name,
-                        datetime: Date.now(),
-                    }
-                },
-                $set: {
-                    email: replaceUndefined(email, existingAccount.email),
-                    profile: {
-                        name: replaceUndefined(name, existingAccount.profile.name),
-                        gender: replaceUndefined(gender, existingAccount.profile.gender),
-                        birthday: replaceUndefined(birthday, existingAccount.profile.birthday),
-                        phone: replaceUndefined(phone, existingAccount.profile.phone),
-                        address: {
-                            num: replaceUndefined(num, existingAccount.profile.address.num),
-                            street: replaceUndefined(street, existingAccount.profile.address.street),
-                            ward: replaceUndefined(ward, existingAccount.profile.address.ward),
-                            district: replaceUndefined(district, existingAccount.profile.address.district),
-                            city: replaceUndefined(city, existingAccount.profile.address.city)
-                        },
-                    },
-                    role: replaceUndefined(role, existingAccount.role),
-                    locked: replaceUndefined(locked, existingAccount.locked)
-                }
-            },
-            { new: true }
-        );
+        await updatedAccount.save();
 
         return res.status(200).json({ success: true, title: 'Updated!', message: 'Account updated successfully.', account: updatedAccount });
     } catch (error) {
@@ -139,7 +142,7 @@ const remove = async (req, res) => {
         const deletedAccount = await Account.findOneAndDelete({ Id });
 
         if (!deletedAccount) {
-            return res.status(404).json({ success: false, message: 'Account not found.' });
+            return res.status(400).json({ success: false, message: 'Account not found.' });
         }
 
         return res.status(200).json({ success: true, title: 'Deleted!', message: 'Account deleted successfully.', account: deletedAccount });
@@ -156,7 +159,7 @@ const changePassword = async (req, res) => {
         const account = await Account.findOne({ Id });
 
         if (!account) {
-            return res.status(404).json({ success: false, message: 'Account not found.' });
+            return res.status(400).json({ success: false, message: 'Account not found.' });
         }
 
         if (!bcrypt.compareSync(currentPassword, account.password)) {
@@ -172,35 +175,6 @@ const changePassword = async (req, res) => {
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
-};
-
-const shouldSkipUpdate = (inputFields, existingAccount) => {
-    const fieldsToUpdate = Object.entries(inputFields)
-        .filter(([key, value]) => value !== undefined)
-        .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
-
-    if (Object.keys(fieldsToUpdate).length === 0) {
-        return true;
-    }
-
-    const convert = {
-        email: existingAccount.email,
-        name: existingAccount.profile.name,
-        gender: existingAccount.profile.gender,
-        birthday: existingAccount.profile.birthday.toISOString().split('T')[0],
-        phone: existingAccount.profile.phone,
-        num: existingAccount.profile.address.num,
-        street: existingAccount.profile.address.street,
-        ward: existingAccount.profile.address.ward,
-        district: existingAccount.profile.address.district,
-        city: existingAccount.profile.address.city,
-        role: existingAccount.role,
-        locked: existingAccount.locked
-    }
-
-    return Object.entries(fieldsToUpdate).every(([key, value]) => {
-        return convert[key] === value;
-    });
 };
 
 module.exports = { register, login, getAll, getByID, update, remove, changePassword };

@@ -13,13 +13,8 @@ router.get('/', function (req, res, next) {
   res.render('product', { title: title, subTitle: 'Product List' });
 });
 
-router.use(authenticate);
-
-
-
-router.use(isAdmin);
-
-
+// router.use(authenticate);
+// router.use(isAdmin);
 
 router.post('/getAll', productController.getAll);
 

@@ -1,5 +1,7 @@
 const { validationResult, check } = require('express-validator');
 const Account = require('../models/account');
+const Customer = require('../models/customer');
+const Product = require('../models/product');
 const Variant = require('../models/variant');
 
 const checkRegister = [
@@ -24,7 +26,7 @@ const checkRegister = [
         .not().isEmpty().withMessage('Birthday cannot be empty.')
         .custom((value) => {
             if (value && !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-                throw new Error('Invalid date format. Please use yyyy-mm-dd.');
+                throw new Error('Invalid date format.');
             }
             return true;
         }),
@@ -62,6 +64,18 @@ const checkRegister = [
 ];
 
 const checkUAccount = [
+    check('Id')
+        .not().isEmpty().withMessage('Account ID cannot be empty.')
+        .custom(async (value, { req }) => {
+            if (value) {
+                const existingAccount = await Account.findOne({ Id: value });
+                if (!existingAccount) {
+                    throw new Error(`Account not found with ID is ${value}.`);
+                }
+            }
+            return true
+        }),
+
     check('email')
         .optional()
         .isEmail().withMessage('Invalid email format')
@@ -89,7 +103,7 @@ const checkUAccount = [
         .not().isEmpty().withMessage('Birthday cannot be empty.')
         .custom((value) => {
             if (value && !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-                throw new Error('Invalid date format. Please use yyyy-mm-dd.');
+                throw new Error('Invalid date format.');
             }
             return true;
         }),
@@ -250,7 +264,16 @@ const checkUProduct = [
 const checkVariant = [
     check('productId')
         .not().isEmpty().withMessage('Product cannot be empty.')
-        .isMongoId().withMessage('Invalid product ID.'),
+        .isMongoId().withMessage('Invalid product ID.')
+        .custom(async (value, { req }) => {
+            if (value) {
+                const existingProduct = await Product.findOne({ _id: value });
+                if (!existingProduct) {
+                    throw new Error('Product not found.');
+                }
+            }
+            return true
+        }),
 
     check('barcode')
         .not().isEmpty().withMessage('Barcode cannot be empty.')
@@ -282,14 +305,33 @@ const checkVariant = [
 ];
 
 const checkUVariant = [
+    check('barcode')
+        .not().isEmpty().withMessage('Barcode cannot be empty.')
+        .custom(async (value, { req }) => {
+            if (value) {
+                const existingVariant = await Variant.findOne({ barcode: value });
+                if (!existingVariant) {
+                    throw new Error(`Variant not found with current barcode is ${value}.`);
+                }
+            }
+            return true
+        }),
+
     check('productId')
-        .optional()
-        .not().isEmpty().withMessage('Product cannot be empty.')
-        .isMongoId().withMessage('Invalid product ID.'),
+        .not().isEmpty().withMessage('You have to provide product value of this variant.')
+        .custom(async (value, { req }) => {
+            if (value) {
+                const existingVariant = await Variant.findOne({ barcode: req.body.barcode });
+                if (existingVariant.product.toString() !== value) {
+                    throw new Error('this variant do not belong to this product.');
+                }
+            }
+            return true
+        }),
 
     check('newbarcode')
         .optional()
-        .not().isEmpty().withMessage('Barcode cannot be empty.')
+        .not().isEmpty().withMessage('New barcode cannot be empty.')
         .custom(async (value, { req }) => {
             if (value === req.body.barcode) return true;
             if (value) {
@@ -325,6 +367,44 @@ const checkUVariant = [
         .isBoolean().withMessage('Invalid actived value.')
 ];
 
+const checkCustomer = [
+    check('name')
+        .not().isEmpty().withMessage('Fullname cannot be empty.')
+        .matches(/^[\p{L}\s]*$/u).withMessage('Fullname should only contain letters and spaces.'),
+
+    check('phone')
+        .not().isEmpty().withMessage('Phone cannot be empty.')
+        .isNumeric().withMessage('Phone must contain only numbers.')
+        .isLength({ min: 10, max: 11 }).withMessage('Phone must be 10 or 11 digits long.')
+        .custom(async (value) => {
+            const existingCustomer = await Customer.findOne({ phone: value });
+            if (existingCustomer) {
+                throw new Error('Phone number already exists.');
+            }
+        }),
+];
+
+const checkUCustomer = [
+    check('name')
+        .optional()
+        .not().isEmpty().withMessage('Fullname cannot be empty.')
+        .matches(/^[\p{L}\s]*$/u).withMessage('Fullname should only contain letters and spaces.'),
+
+    check('phone')
+        .optional()
+        .not().isEmpty().withMessage('Phone cannot be empty.')
+        .isNumeric().withMessage('Phone must contain only numbers.')
+        .isLength({ min: 10, max: 11 }).withMessage('Phone must be 10 or 11 digits long.')
+        .custom(async (value, { req }) => {
+            if (value) {
+                const existingCustomer = await Customer.findOne({ phone: value, Id: { $ne: req.body.Id } });
+                if (existingCustomer) {
+                    throw new Error('Phone number already exists.');
+                }
+            }
+        }),
+];
+
 function validate(req, res, next) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -336,5 +416,5 @@ function validate(req, res, next) {
 
 module.exports = {
     validate, checkRegister, checkUAccount, checkNameCategory, checkSpecsCategory, checkProduct,
-    checkUProduct, checkVariant, checkUVariant
+    checkUProduct, checkVariant, checkUVariant, checkCustomer, checkUCustomer
 };

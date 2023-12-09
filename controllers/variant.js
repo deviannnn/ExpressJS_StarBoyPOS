@@ -1,16 +1,10 @@
 const mongoose = require('mongoose');
 const Variant = require('../models/variant');
-const Product = require('../models/product');
 
 const create = async (req, res) => {
     const { productId, barcode, color, cost, price, warn } = req.body;
 
     try {
-        const existingProduct = await Product.findOne({ _id: productId });
-        if (!existingProduct) {
-            return res.status(400).json({ success: false, message: 'Product not found.' });
-        }
-
         const newVariant = new Variant({
             product: new mongoose.Types.ObjectId(productId),
             img: req.file ? req.file.filename : 'default-variant.png',
@@ -86,34 +80,20 @@ const update = async (req, res) => {
 
     try {
         const updatedVariant = await Variant.findOne({ barcode });
-        if (!updatedVariant) {
-            return res.status(400).json({ success: false, message: 'Variant not found.' });
-        }
+
+        const updateFields = { color, cost, price, warn, actived };
 
         let diff = false;
+
+        for (const [key, value] of Object.entries(updateFields)) {
+            if (value !== undefined && value !== updatedVariant[key]) {
+                updatedVariant[key] = value;
+                diff = true;
+            }
+        }
         if (newbarcode !== undefined && newbarcode !== updatedVariant.barcode) {
-            updatedVariant.barcode = newbarcode;
-            diff = true;
-        }
-        if (color !== undefined && color !== updatedVariant.color) {
-            updatedVariant.color = color;
-            diff = true;
-        }
-        if (cost !== undefined && cost !== updatedVariant.cost) {
-            updatedVariant.cost = cost;
-            diff = true;
-        }
-        if (price !== undefined && price !== updatedVariant.price) {
-            updatedVariant.price = price;
-            diff = true;
-        }
-        if (warn !== undefined && warn !== updatedVariant.warn) {
-            updatedVariant.warn = warn;
-            diff = true;
-        }
-        if (actived !== undefined && actived !== updatedVariant.actived) {
-            updatedVariant.actived = actived;
-            diff = true;
+            updatedVariant.barcode = newbarcode,
+                diff = true;
         }
         if (req.file !== undefined) {
             updatedVariant.img = req.file.filename;
