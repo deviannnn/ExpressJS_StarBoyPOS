@@ -2,19 +2,29 @@ const jwt = require('jsonwebtoken');
 
 const secretKey = process.env.SECRET_KEY;
 
-const generateJWT = async (account) => {
+const generateJWT = async (account, source) => {
     try {
+        let expiresIn = '24h';
+
+        if (source === 'register' || source === 'reset_password') {
+            expiresIn = '1m';
+        }
+
         const token = await jwt.sign(
             {
                 Id: account.Id,
-                email: account.email,
+                gmail: account.gmail,
                 name: account.profile.name,
-                role: account.role
+                avatar: account.profile.avatar,
+                actived: account.actived,
+                locked: account.locked,
+                role: account.role,
+                source: source
             },
             secretKey,
             {
                 algorithm: 'HS256',
-                expiresIn: '24h',
+                expiresIn: expiresIn
             }
         );
         return token;

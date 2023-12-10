@@ -4,11 +4,20 @@ const Customer = require('../models/customer');
 const Product = require('../models/product');
 const Variant = require('../models/variant');
 
+const isGmail = (value) => {
+    return /^\w+([\.-]?\w+)*@gmail\.com$/.test(value);
+};
+
 const checkRegister = [
-    check('email')
-        .isEmail().withMessage('Invalid email format')
+    check('gmail')
+        .custom((value) => {
+            if (!isGmail(value)) {
+                throw new Error('Invalid gmail format. Please provide a Gmail address.');
+            }
+            return true;
+        })
         .custom(async (value) => {
-            const existingAccount = await Account.findOne({ email: value });
+            const existingAccount = await Account.findOne({ gmail: value });
             if (existingAccount) {
                 throw new Error('Email already exists.');
             }
@@ -76,12 +85,17 @@ const checkUAccount = [
             return true
         }),
 
-    check('email')
+    check('gmail')
         .optional()
-        .isEmail().withMessage('Invalid email format')
+        .custom((value) => {
+            if (!isGmail(value)) {
+                throw new Error('Invalid gmail format. Please provide a Gmail address.');
+            }
+            return true;
+        })
         .custom(async (value, { req }) => {
             if (value) {
-                const existingAccount = await Account.findOne({ email: value, Id: { $ne: req.body.Id } });
+                const existingAccount = await Account.findOne({ gmail: value, Id: { $ne: req.body.Id } });
                 if (existingAccount) {
                     throw new Error('Email already exists.');
                 }

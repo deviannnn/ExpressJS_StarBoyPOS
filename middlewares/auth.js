@@ -16,6 +16,14 @@ const authenticate = async (req, res, next) => {
     }
 }
 
+const isLoggedIn = (req, res, next) => {
+    if (req.user && req.source === 'login') {
+        next();
+    } else {
+        return res.status(403).json({ success: false, message: 'Forbidden - You are not logged in.' });
+    }
+};
+
 const isAdmin = (req, res, next) => {
     if (req.user && req.user.role === 'admin') {
         next();
@@ -24,4 +32,4 @@ const isAdmin = (req, res, next) => {
     }
 };
 
-module.exports = { authenticate, isAdmin };
+module.exports = { authenticate, isLoggedIn, isAdmin };

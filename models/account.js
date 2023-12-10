@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const accountSchema = new mongoose.Schema({
     Id: { type: String, unique: true, required: true },
-    email: { type: String, required: true, unique: true },
+    gmail: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     profile: {
         name: { type: String, required: true },

@@ -6,9 +6,9 @@ const upload = require('../utils/upload-image');
 const { validate, checkVariant, checkUVariant } = require('../middlewares/validate');
 const { authenticate, isAdmin } = require('../middlewares/auth');
 
-router.use(authenticate);
+// router.use(authenticate);
 
-router.use(isAdmin);
+// router.use(isAdmin);
 
 router.post('/getAllByProduct', variantController.getAllByProductID);
 

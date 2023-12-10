@@ -40,7 +40,7 @@ function displayAccounts(accounts) {
                 </div>
                 <div class="d-flex flex-column justify-content-center">
                     <h6 h6 class="mb-0 text-sm">${account.profile.name}</h6>
-                    <p class="text-xs text-secondary mb-0">${account.email}</p>
+                    <p class="text-xs text-secondary mb-0">${account.gmail}</p>
                     </div>
             </div>
         </td>`);
@@ -234,7 +234,7 @@ function displayAccountDetail(account) {
     $('#detail-img-account').attr('src', `/uploads/accounts/${account.profile.avatar}`);
     $('#detail-id-account').text(account.Id);
     $('#detail-name-account').text(account.profile.name);
-    $('#detail-email-account').text(account.email);
+    $('#detail-gmail-account').text(account.gmail);
     $('#detail-phone-account').text(account.profile.phone);
     $('#detail-gender-account').text(account.profile.gender);
     $('#detail-birthday-account').text(formatDate(account.profile.birthday));
@@ -266,7 +266,7 @@ function displayAccountEdit(account) {
         }
     });
     $('#name').val(account.profile.name);
-    $('#email').val(account.email);
+    $('#gmail').val(account.gmail);
     $('#phone').val(account.profile.phone);
     $('#birthday').val(formatForBirthdayInput(account.profile.birthday));
     $('#num').val(account.profile.address.num);
@@ -288,7 +288,7 @@ function onConfirmEditButtonClick() {
     if (isValid) {
         const data = {
             Id: getValue('#Id'),
-            email: getValue('#email'),
+            gmail: getValue('#gmail'),
             name: getValue('#name'),
             gender: getValue('#gender'),
             birthday: getValue('#birthday'),
@@ -351,12 +351,12 @@ function onNextEditButtonClick() {
     }
 }
 
-$('#name, #email, #birthday, #phone, #num, #street, #ward, #district, #city').on('input', function () {
+$('#name, #gmail, #birthday, #phone, #num, #street, #ward, #district, #city').on('input', function () {
     validateInput($(this));
 });
 
 function validateAllFields() {
-    const fields = ['#name', '#email', '#birthday', '#phone', '#num', '#street', '#ward', '#district', '#city'];
+    const fields = ['#name', '#gmail', '#birthday', '#phone', '#num', '#street', '#ward', '#district', '#city'];
     let countError = 0;
     for (const field of fields) {
         const check = validateInput($(field));
@@ -385,12 +385,12 @@ function validateInput(input) {
         return true;
     };
 
-    if (input.is('#email')) {
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-            return showError('#email-err', '(invalid email)');
+    if (input.is('#gmail')) {
+        if (!/^\w+([\.-]?\w+)*@gmail\.com$/.test(value)) {
+            return showError('#gmail-err', '(invalid gmail)');
         }
 
-        return showSuccess('#email-err');
+        return showSuccess('#gmail-err');
     }
 
     if (input.is('#phone')) {

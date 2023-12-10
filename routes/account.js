@@ -4,27 +4,43 @@ var router = express.Router();
 const accountController = require('../controllers/account');
 const upload = require('../utils/upload-image');
 const { validate, checkRegister, checkUAccount } = require('../middlewares/validate');
-const { authenticate, isAdmin } = require('../middlewares/auth');
+const { authenticate, isLoggedIn, isAdmin } = require('../middlewares/auth');
 
 const title = 'Accounts';
 
-router.post('/login', accountController.login);
-
-
-router.get('/profile', function (req, res) {
-  res.render('account-profile', { title: "Profile", subTitle: 'Profile' });
+router.get('/login', function (req, res) {
+  res.render('account_login', { layout: null });
 });
 
+router.post('/login', accountController.login);
+
+router.get('/password/reset', function (req, res) {
+  res.render('account_reset_pw', { layout: null });
+});
+
+router.post('/password/reset', accountController.resetPassword);
+
+// router.use(authenticate);
+
+router.get('/password/change', function (req, res) {
+  const source = req.query.source;
+  res.render('account_change_pw', { layout: null });
+});
+
+// router.use(isLoggedIn);
+
+router.get('/profile', function (req, res) {
+  res.render('account_profile', { title: "Profile", subTitle: 'Profile' });
+});
 
 router.get('/', function (req, res) {
-  res.render('account', { title: title, subTitle: 'Account List', script: 'account.render.js' });
+  res.render('account_list', { title: title, subTitle: 'Account List', script: 'account.render.js' });
 });
 
 router.get('/register', function (req, res) {
-  res.render('account-register', { title: title, subTitle: 'New Account', script: 'account-register.render.js' });
+  res.render('account_register', { title: title, subTitle: 'New Account', script: 'account_register.render.js' });
 });
 
-// router.use(authenticate);
 
 // router.use(isAdmin);
 

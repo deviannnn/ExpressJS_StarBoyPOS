@@ -6,14 +6,14 @@ const { generateJWT } = require('../utils/jwt');
 const { generateId } = require('../utils/auto-id');
 
 const register = async (req, res) => {
-    const { email, name, gender, birthday, phone, num, street, ward, district, city } = req.body;
+    const { gmail, name, gender, birthday, phone, num, street, ward, district, city } = req.body;
 
     try {
-        const hashedPassword = bcrypt.hashSync(email.split('@')[0], 10);
+        const hashedPassword = bcrypt.hashSync(gmail.split('@')[0], 10);
 
         const newAccount = new Account({
             Id: generateId('STF'),
-            email: email,
+            gmail: gmail,
             password: hashedPassword,
             profile: {
                 name: name,
@@ -31,6 +31,8 @@ const register = async (req, res) => {
 
         await newAccount.save();
 
+        // const token = await generateJWT(newAccount, 'register');
+        // const link = `http://localhost:3000/account/password/change?source=register&token=${token}`
         return res.status(201).json({ success: true, title: 'Registed!', message: 'Account registered successfully.' });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Internal Server Error' });
@@ -41,19 +43,79 @@ const login = async (req, res) => {
     const { username, password } = req.body;
 
     try {
-        const account = await Account.findOne({ email: `${username}@gmail.com` });
+        const account = await Account.findOne({ gmail: `${username}@gmail.com` });
 
         if (!account || !bcrypt.compareSync(password, account.password)) {
-            return res.status(401).json({ success: false, message: 'Invalid email or password.' });
+            return res.status(400).json({ success: false, message: 'Invalid username or password.' });
+        }
+        if (account.actived === false) {
+            return res.status(400).json({ success: false, message: 'Please login by clicking on the link in your gmail.' });
         }
 
-        const token = await generateJWT(account);
+        const token = await generateJWT(account, 'login');
 
         return res.status(200).json({ success: true, message: 'Login successful.', token: token });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
 }
+
+const changePassword = async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    const Id = req.user.Id;
+
+    try {
+        const account = await Account.findOne({ Id });
+
+        if (!account) {
+            return res.status(400).json({ success: false, message: 'Account not found.' });
+        }
+
+        if (!bcrypt.compareSync(currentPassword, account.password)) {
+            return res.status(400).json({ success: false, message: 'Current password is incorrect.' });
+        }
+
+        const hashedNewPassword = bcrypt.hashSync(newPassword, 10);
+        account.password = hashedNewPassword;
+
+        await account.save();
+
+        return res.status(200).json({ success: true, message: 'Password changed successfully.' });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+};
+
+const resetPassword = async (req, res) => {
+    const value = req.body.value;
+
+    try {
+        let filter = {};
+
+        if (/^\w+([\.-]?\w+)*@gmail\.com$/.test(value)) {
+            filter = { gmail: value };
+        } else if (/^\d{10,11}$/.test(value)) {
+            filter = { 'profile.phone': value };
+        } else if (/^[A-Za-z]{3}-\d{13}-\d{4}$/.test(value)) {
+            filter = { Id: value };
+        } else {
+            return res.status(400).json({ success: false, message: 'Account not found.' });
+        }
+
+        const account = await Account.findOne(filter);
+
+        if (!account) {
+            return res.status(400).json({ success: false, message: 'Account not found.' });
+        }
+
+        // Thực hiện các bước cần thiết cho việc reset password
+
+        return res.status(200).json({ success: true, message: 'Reset password request processed successfully.' });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+};
+
 
 const getAll = async (req, res) => {
     try {
@@ -81,14 +143,14 @@ const getByID = async (req, res) => {
 }
 
 const update = async (req, res) => {
-    const { Id, email, name, gender, birthday, phone, num, street, ward, district, city, role, locked } = req.body;
+    const { Id, gmail, name, gender, birthday, phone, num, street, ward, district, city, role, locked } = req.body;
 
     try {
         const updatedAccount = await Account.findOne({ Id });
 
         let diff = false;
         const updateFields = {
-            email,
+            gmail,
             'profile.name': name,
             'profile.gender': gender,
             'profile.phone': phone,
@@ -151,30 +213,4 @@ const remove = async (req, res) => {
     }
 };
 
-const changePassword = async (req, res) => {
-    const { currentPassword, newPassword } = req.body;
-    const Id = req.user.Id;
-
-    try {
-        const account = await Account.findOne({ Id });
-
-        if (!account) {
-            return res.status(400).json({ success: false, message: 'Account not found.' });
-        }
-
-        if (!bcrypt.compareSync(currentPassword, account.password)) {
-            return res.status(401).json({ success: false, message: 'Current password is incorrect.' });
-        }
-
-        const hashedNewPassword = bcrypt.hashSync(newPassword, 10);
-        account.password = hashedNewPassword;
-
-        await account.save();
-
-        return res.status(200).json({ success: true, message: 'Password changed successfully.' });
-    } catch (error) {
-        return res.status(500).json({ success: false, message: 'Internal Server Error' });
-    }
-};
-
-module.exports = { register, login, getAll, getByID, update, remove, changePassword };
+module.exports = { register, login, resetPassword, changePassword, getAll, getByID, update, remove };
