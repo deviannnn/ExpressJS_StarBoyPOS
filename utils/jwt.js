@@ -6,7 +6,7 @@ const generateJWT = async (account, source) => {
     try {
         let expiresIn = '24h';
 
-        if (source === 'register' || source === 'reset_password') {
+        if (source === 'register' || source === 'password_reset') {
             expiresIn = '1m';
         }
 

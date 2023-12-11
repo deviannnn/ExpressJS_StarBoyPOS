@@ -1,18 +1,19 @@
+const createError = require('http-errors');
 const { extractToken, decodeToken } = require('../utils/jwt');
 
 const authenticate = async (req, res, next) => {
     const token = extractToken(req);
 
     if (!token) {
-        return res.status(401).json({ success: false, message: 'Unauthorized - Missing token' });
+        return next(createError(401));
     }
 
     try {
         const decoded = await decodeToken(token);
         req.user = decoded;
-        next();
+        return next();
     } catch (error) {
-        res.status(401).json({ success: false, message: 'Unauthorized - ' + error.message });
+        return next(createError(401));
     }
 }
 
@@ -20,7 +21,7 @@ const isLoggedIn = (req, res, next) => {
     if (req.user && req.source === 'login') {
         next();
     } else {
-        return res.status(403).json({ success: false, message: 'Forbidden - You are not logged in.' });
+        next(createError(403));
     }
 };
 
@@ -28,7 +29,7 @@ const isAdmin = (req, res, next) => {
     if (req.user && req.user.role === 'admin') {
         next();
     } else {
-        return res.status(403).json({ success: false, message: 'Forbidden - Admin access required.' });
+        next(createError(403));
     }
 };
 

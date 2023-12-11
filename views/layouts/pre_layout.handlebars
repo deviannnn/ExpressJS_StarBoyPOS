@@ -22,43 +22,8 @@
 </head>
 
 <body class="g-sidenav-show bg-gray-100 g-sidenav-pinned">
-    <main class="main-content mt-0 ps">
-        <div class="page-header align-items-start min-vh-50 pt-5 pb-11 m-3 border-radius-lg"
-            style="background-image: url('/assets/img/curved-images/curved8.jpg');">
-            <span class="mask bg-gradient-dark opacity-6"></span>
-        </div>
-        <div class="container">
-            <div class="row mt-lg-n10 mt-md-n11 mt-n10 justify-content-center">
-                <div class="col-xl-4 col-lg-5 col-md-7 mx-auto">
-                    <div class="card">
-                        <div class="card-body text-center">
-                            <div class="info mb-2">
-                                <img class="avatar avatar-xxl" alt="Image placeholder"
-                                    src="/assets/img/locked-icon.png">
-                            </div>
-                            <h6 class="mb-2 font-weight-bolder">Trouble logging in?</h6>
-                            <p class="mb-4 text-xs">Enter your email, phone, or account_id and we'll send you a link to
-                                get back
-                                into your account.</p>
-                            <form role="form">
-                                <div class="mb-3">
-                                    <input type="password" class="form-control" placeholder="Email, Phone or Account ID"
-                                        aria-label="password">
-                                </div>
-                                <div class="text-center">
-                                    <button type="button" class="btn bg-gradient-dark w-100 mt-2 mb-4">Send login
-                                        link</button>
-                                </div>
-                                <p class="text-sm mt-3 mb-0">
-                                    <a href="/" class="text-dark">Back to login</a>
-                                </p>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
+    {{{body}}}
+
     <footer class="footer py-5">
         <div class="container">
             <div class="row">
@@ -113,6 +78,70 @@
         </div>
     </footer>
 
+    <!-- Modal Loading -->
+    <div class="modal fade" id="loadingModal" tabindex="-1" role="dialog" aria-labelledby="success-modal"
+        aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-danger modal-dialog-centered modal-" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="text-center">
+                        <div class="spinner-border text-default"
+                            style="margin-top: 1.5rem; --bs-spinner-width: 3rem; --bs-spinner-height: 3rem;"></div>
+                        <h3 class="font-weight-bolder opacity-9 mt-4">Loading...</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal Success -->
+    <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="success-modal"
+        aria-hidden="true">
+        <div class="modal-dialog modal-danger modal-dialog-centered modal-" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="text-center">
+                        <div class="swal2-icon swal2-success swal2-icon-show" style="display: flex;">
+                            <div class="swal2-success-circular-line-left" style="background-color: rgb(255, 255, 255);">
+                            </div>
+                            <span class="swal2-success-line-tip"></span> <span class="swal2-success-line-long"></span>
+                            <div class="swal2-success-ring"></div>
+                            <div class="swal2-success-fix" style="background-color: rgb(255, 255, 255);"></div>
+                            <div class="swal2-success-circular-line-right"
+                                style="background-color: rgb(255, 255, 255);"></div>
+                        </div>
+                        <h3 id="modal-success-title" class="font-weight-bolder opacity-9 mt-4"></h3>
+                        <p id="modal-success-msg"></p>
+                    </div>
+                    <div class="d-flex justify-content-center mt-4">
+                        <button type="button" class="btn bg-gradient-info" data-bs-dismiss="modal">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal Fail -->
+    <div class="modal fade" id="failModal" tabindex="-1" role="dialog" aria-labelledby="fail-modal" aria-hidden="true">
+        <div class="modal-dialog modal-danger modal-dialog-centered modal-" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="text-center">
+                        <div class="swal2-icon swal2-error swal2-icon-show" style="display: flex;"><span
+                                class="swal2-x-mark">
+                                <span class="swal2-x-mark-line-left"></span>
+                                <span class="swal2-x-mark-line-right"></span>
+                            </span>
+                        </div>
+                        <h3 class="font-weight-bolder opacity-9 mt-4">Failed!</h3>
+                        <p id="message-modal-fail"></p>
+                    </div>
+                    <div class="d-flex justify-content-center mt-4">
+                        <button type="button" class="btn bg-gradient-info" data-bs-dismiss="modal">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!--   Core JS Files   -->
     <script src="/assets/js/core/popper.min.js"></script>
     <script src="/assets/js/core/bootstrap.min.js"></script>
@@ -131,6 +160,10 @@
 
     <!-- Jqeury -->
     <script src="/assets/plugins/jquery/jquery.min.js"></script>
+
+    {{#if script}}
+    <script src="/javascripts/{{script}}.js"></script>
+    {{/if}}
 
     <!-- Github buttons -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>

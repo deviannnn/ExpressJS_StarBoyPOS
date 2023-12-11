@@ -40,6 +40,9 @@ function onConfirmButtonClick() {
             headers: {
                 'Authorization': 'Bearer '
             },
+            beforeSend: function () {
+                $('#loadingModal').modal('show');
+            },
             success: function (response) {
                 if (response.success) {
                     $('#modal-created-title').text(response.title);
@@ -65,6 +68,11 @@ function onConfirmButtonClick() {
                 }
                 $('#message-modal-fail').html(msg);
                 $('#failModal').modal('show');
+            },
+            complete: function () {
+                setTimeout(function () {
+                    $('#loadingModal').modal('hide');
+                }, 500);
             }
         });
     } else {

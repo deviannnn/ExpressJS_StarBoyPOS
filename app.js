@@ -57,19 +57,26 @@ app.use(function (req, res, next) {
 
 // error handler
 app.use(function (err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
   console.log(err.message)
-  // render the error page
+
+  const getError = (status) => {
+    switch (status) {
+      case 401:
+        return { status: 'Error 401', title: 'Unauthorized', message: 'You are not allowed to access this resource.' };
+      case 403:
+        return { status: 'Error 403', title: 'Forbidden', message: 'You do not have permission to access this resource.' };
+      default:
+        return { status: 'Error 404', title: 'Erm. Page not found', message: 'The requested resource could not be found.' };
+    }
+  }
+
   res.status(err.status || 500);
-  if (err.status === 404) {
-    res.render('404', { layout: null });
+  if (err.status === 401 || err.status === 403 || err.status === 404) {
+    const error = getError(err.status);
+    res.render('error', { layout: null, error: error });
   } else {
     res.render('500', { layout: null });
   }
-
 });
 
 module.exports = app;
