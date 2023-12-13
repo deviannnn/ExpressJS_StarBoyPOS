@@ -17,7 +17,7 @@
             <div class="col-xl-4 col-lg-5 col-md-7 mx-auto">
                 <div class="card z-index-0">
                     <div class="card-header text-center pt-4">
-                        <h5>Sign in</h5>
+                        <h5>Log in</h5>
                     </div>
                     <div class="row px-xl-5 px-sm-4 px-3">
                         <div class="col-3 ms-auto px-1">
@@ -74,14 +74,12 @@
                     <div class="card-body">
                         <form role="form" class="text-start">
                             <div class="mb-3">
-                                <input type="text" id="username" class="form-control" placeholder="Username">
+                                <input type="text" id="username" class="form-control" placeholder="Username"
+                                    oninput="checkInputLength()">
                             </div>
                             <div class="mb-3">
-                                <input type="password" id="password" class="form-control" placeholder="Password">
-                            </div>
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="rememberMe">
-                                <label class="form-check-label" for="rememberMe">Remember me</label>
+                                <input type="password" id="password" class="form-control" placeholder="Password"
+                                    oninput="checkInputLength()">
                             </div>
 
                             <div class="alert alert-danger" role="alert" style="display: none;">
@@ -90,11 +88,11 @@
                             </div>
 
                             <div class="text-center">
-                                <button type="button" class="btn bg-gradient-dark w-100 mt-2 mb-4"
-                                    onclick="login()">Sign in</button>
+                                <button type="button" id="loginBtn" class="btn bg-gradient-dark w-100 mt-2 mb-4"
+                                    disabled onclick="login()">Log in</button>
                             </div>
                             <p class="text-sm mt-3 mb-0">
-                                <a href="/account/password/reset" class="text-dark">Forgot password?</a>
+                                <a href="/password/reset" class="text-dark">Forgot password?</a>
                             </p>
                         </form>
                     </div>

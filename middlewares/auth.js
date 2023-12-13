@@ -1,11 +1,11 @@
-const createError = require('http-errors');
+const revokedTokens = new Set();
 const { extractToken, decodeToken } = require('../utils/jwt');
 
 const authenticate = async (req, res, next) => {
     const token = extractToken(req);
 
     if (!token) {
-        return next(createError(401));
+        return res.redirect('/login');
     }
 
     try {
@@ -13,24 +13,42 @@ const authenticate = async (req, res, next) => {
         req.user = decoded;
         return next();
     } catch (error) {
-        return next(createError(401));
+        return res.redirect('/login');
     }
 }
 
-const isLoggedIn = (req, res, next) => {
-    if (req.user && req.source === 'login') {
-        next();
+const checkRevokedToken = (req, res, next) => {
+    const token = req.cookies['jwt'];
+
+    if (revokedTokens.has(token)) {
+        return res.redirect('/login');
+    }
+
+    next();
+};
+
+const isPasswordChange = (req, res, next) => {
+    if (req.user && req.user.source === 'password_change') {
+        return next();
     } else {
-        next(createError(403));
+        return res.redirect('/');
+    }
+};
+
+const isLoggedIn = (req, res, next) => {
+    if (req.user && req.user.source === 'login') {
+        return next();
+    } else {
+        return res.redirect('/login');
     }
 };
 
 const isAdmin = (req, res, next) => {
     if (req.user && req.user.role === 'admin') {
-        next();
+        return next();
     } else {
-        next(createError(403));
+        return res.redirect('/');
     }
 };
 
-module.exports = { authenticate, isLoggedIn, isAdmin };
+module.exports = { authenticate, checkRevokedToken, revokedTokens, isPasswordChange, isLoggedIn, isAdmin };

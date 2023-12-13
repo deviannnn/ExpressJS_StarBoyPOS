@@ -4,11 +4,7 @@ $(document).ready(function () {
     localStorage.setItem('passwordChangeToken', token);
 });
 
-$('#newPassword').on('input', function () {
-    validateConfirmPassword();
-});
-
-$('#confirmPassword').on('input', function () {
+$('#newPassword, #confirmPassword').on('input', function () {
     validateConfirmPassword();
 });
 
@@ -16,14 +12,14 @@ function validateConfirmPassword() {
     const newPassword = $('#newPassword').val();
     const confirmPassword = $('#confirmPassword').val();
 
-    if (newPassword !== '' && confirmPassword === newPassword) {
+    if (newPassword !== '' && confirmPassword === newPassword && newPassword.length >= 6) {
         $('#confirmPassword').removeClass('is-invalid').addClass('is-valid');
         $('#changeBtn').prop('disabled', false);
-        return false;
+        return true;
     } else {
         $('#confirmPassword').removeClass('is-valid').addClass('is-invalid');
         $('#changeBtn').prop('disabled', true);
-        return true;
+        return false;
     }
 }
 
@@ -33,9 +29,9 @@ function passwordChange() {
     const confirmPassword = $('#confirmPassword').val();
     const token = localStorage.getItem('passwordChangeToken');
 
-    if (validateConfirmPassword) {
+    if (validateConfirmPassword()) {
         $.ajax({
-            url: '/account/password/change',
+            url: '/password/change',
             method: 'POST',
             dataType: 'json',
             data: { accountId, newPassword, confirmPassword },
@@ -48,7 +44,7 @@ function passwordChange() {
                     $('#modal-success-msg').text(response.message);
                     $('#successModal').modal('show');
                     setTimeout(function () {
-                        window.location.href = '/account/login';
+                        window.location.href = '/login';
                     }, 4000);
                 }
             },
@@ -65,5 +61,4 @@ function passwordChange() {
             }
         });
     }
-
 }

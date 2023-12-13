@@ -3,9 +3,6 @@ function init() {
         url: '/account/getAll',
         method: 'POST',
         dataType: 'json',
-        headers: {
-            'Authorization': 'Bearer '
-        },
         success: function (response) {
             if (response.success) {
                 displayAccounts(response.accounts);
@@ -44,9 +41,13 @@ function displayAccounts(accounts) {
                     </div>
             </div>
         </td>`);
-        row.append(`<td><span class="badge badge-sm ${getBadgeClass(account.actived, 'status')}">${account.actived ? 'actived' : 'unactived'}</span></td>`);
+        row.append(`
+            <td>
+                <span class="${account.actived ? '' : 'btn send'} badge badge-sm ${getBadgeClass(account.actived, 'status')}" data-id="${account.Id}">
+                ${account.actived ? 'actived' : 'unactived'}</span>
+            </td>`);
         row.append(`<td><span class="text-secondary text-xs font-weight-bold">${formatDate(account.created.datetime)}</span></td>`);
-        row.append(`<td><span class="mt-3 badge btn lock badge-sm ${getBadgeClass(account.locked, 'locked')}" data-id="${account.Id}">${account.locked ? 'locked' : 'nolocked'}</span></td>`);
+        row.append(`<td><span class="mt-3 btn lock badge badge-sm ${getBadgeClass(account.locked, 'locked')}" data-id="${account.Id}">${account.locked ? 'locked' : 'nolocked'}</span></td>`);
         row.append(`
             <td>
                 <a class="action-btn detail" data-id="${account.Id}"><i class="fas fa-eye text-primary text-gradient" aria-hidden="true"></i></a>
@@ -68,7 +69,7 @@ function displayAccounts(accounts) {
 }
 
 // Handler
-$('tbody').on('click', '.detail, .edit, .delete, .lock', function () {
+$('tbody').on('click', '.detail, .edit, .delete, .send, .lock', function () {
     const Id = $(this).data("id");
 
     const clickedElement = this;
@@ -78,9 +79,6 @@ $('tbody').on('click', '.detail, .edit, .delete, .lock', function () {
         method: 'POST',
         dataType: 'json',
         data: { Id: Id },
-        headers: {
-            'Authorization': 'Bearer '
-        },
         success: function (response) {
             if (response.success) {
                 const account = response.account;
@@ -98,8 +96,14 @@ $('tbody').on('click', '.detail, .edit, .delete, .lock', function () {
                         displayAccountLock(account);
                         break;
 
+                    case $(clickedElement).hasClass('send'):
+                        $('.current-account').text(`${account.gmail}`);
+                        $('#resendMailId').val(account.Id);
+                        $('#resendMailModal').modal('show');
+                        break;
+
                     case $(clickedElement).hasClass('delete'):
-                        $('.del-name-account').text(`(${account.profile.name})`);
+                        $('.current-account').text(`(${account.profile.name})`);
                         $('#deleteId').val(account.Id);
                         $('#deleteModal').modal('show');
                         break;
@@ -123,6 +127,49 @@ $('tbody').on('click', '.detail, .edit, .delete, .lock', function () {
     });
 });
 
+// ResendMail module
+$('#confirm-resend-btn').on('click', onConfirmResendMailClick);
+
+function onConfirmResendMailClick() {
+    const resendMailId = getValue('#resendMailId');
+
+    $.ajax({
+        url: '/account/resendMail',
+        method: 'POST',
+        dataType: 'json',
+        data: { Id: resendMailId },
+        beforeSend: function () {
+            $('#loadingModal').modal('show');
+        },
+        success: function (response) {
+            if (response.success) {
+                $('#modal-success-title').text(response.title);
+                $('#modal-success-msg').text(response.message);
+                $('#successModal').modal('show');
+            } else {
+                $('#message-modal-fail').html(response.message);
+                $('#failModal').modal('show');
+            }
+        },
+        error: function (xhr, status, error) {
+            let msg;
+            if (xhr.status === 400) {
+                const response = JSON.parse(xhr.responseText);
+                msg = response.message;
+            } else {
+                msg = error;
+            }
+            $('#message-modal-fail').html(msg);
+            $('#failModal').modal('show');
+        },
+        complete: function () {
+            setTimeout(function () {
+                $('#loadingModal').modal('hide');
+            }, 500);
+        }
+    });
+}
+
 // Delete module
 $('#confirm-del-btn').on('click', onConfirmDelButtonClick);
 
@@ -134,9 +181,6 @@ function onConfirmDelButtonClick() {
         method: 'DELETE',
         dataType: 'json',
         data: { Id: deleteId },
-        headers: {
-            'Authorization': 'Bearer '
-        },
         success: function (response) {
             if (response.success) {
                 $('#modal-success-title').text(response.title);
@@ -173,11 +217,11 @@ function displayAccountLock(account) {
     $('.lock-name').text(account.profile.name);
     $('.lock-gender').text(`${account.profile.gender === 'male' ? 'he' : 'she'}`);
     if (account.locked) {
-        $('#unlock-msg').show();
-        $('#lock-msg').hide();
+        $('#unlock-status').show();
+        $('#lock-status').hide();
     } else {
-        $('#unlock-msg').hide();
-        $('#lock-msg').show();
+        $('#unlock-status').hide();
+        $('#lock-status').show();
     }
     $('#lockedId').val(account.Id);
     $('#lockedValue').val(!account.locked);
@@ -197,9 +241,6 @@ function onConfirmLockButtonClick() {
         method: 'PUT',
         dataType: 'json',
         data: data,
-        headers: {
-            'Authorization': 'Bearer '
-        },
         success: function (response) {
             if (response.success) {
                 $('#modal-success-title').text(response.title);
@@ -242,7 +283,7 @@ function displayAccountDetail(account) {
     $('#detail-role-account').text(account.role).removeClass().addClass(`pt-2 badge badge-sm ${getBadgeClass(account.role, 'role')}`);
     $('#detail-status-account').text(`${account.actived ? 'actived' : 'unactived'}`).removeClass().addClass(`pt-2 badge badge-sm ${getBadgeClass(account.actived, 'status')}`);
     $('#detail-locked-account').text(`${account.locked ? 'locked' : 'nolock'}`).removeClass().addClass(`pt-2 badge badge-sm ${getBadgeClass(account.locked, 'locked')}`);
-    $('#detail-created-account').text(formatDateTime(account.created.datetime));
+    $('#detail-created-account').text(`${formatDateTime(account.created.datetime)} by ${account.created.name} (${account.created.Id})`);
 
     if (account.updated.length > 0) {
         account.updated.sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
@@ -305,9 +346,6 @@ function onConfirmEditButtonClick() {
             method: 'PUT',
             dataType: 'json',
             data: data,
-            headers: {
-                'Authorization': 'Bearer '
-            },
             success: function (response) {
                 if (response.success) {
                     $('#modal-success-title').text(response.title);

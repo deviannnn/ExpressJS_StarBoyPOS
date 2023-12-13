@@ -29,7 +29,13 @@
                         <h1 class="display-1 text-bolder text-gradient text-danger">{{error.status}}</h1>
                         <h2>{{error.title}}</h2>
                         <p class="lead">{{error.message}}</p>
-                        <button type="button" class="btn bg-gradient-dark mt-4" onclick="window.location.href='/'">Go Back</button>
+                        {{#if (eq error.status 401)}}
+                        <button type="button" class="btn bg-gradient-dark mt-4" onclick="window.location.href='/login'">
+                            Login</button>
+                        {{else}}
+                        <button type="button" class="btn bg-gradient-dark mt-4" onclick="window.location.href='/'">
+                            Go Back</button>
+                        {{/if}}
                     </div>
                     <div class="col-lg-6 my-auto position-relative">
                         <img class="w-100 position-relative" src="/assets/img/illustrations/error-404.png"

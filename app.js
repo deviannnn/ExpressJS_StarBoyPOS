@@ -2,58 +2,47 @@ const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
+const session = require('express-session');
 const logger = require('morgan');
 const mongoose = require('mongoose');
-const hbs = require('express-handlebars');
 require('dotenv').config();
 
-const dbConfig = require('./configs/database')
-const ratelimitConfig = require('./configs/ratelimit')
+const database = require('./configs/database')
+const { hbsEngine } = require('./configs/handlebars')
+const { commonLimiter } = require('./configs/ratelimit')
+const indexRouter = require('./routes/index');
 
 const app = express();
 
+// database setup
 switch (app.get('env')) {
   case 'development':
-    mongoose.connect(dbConfig.development.connectionString).then(() => console.log('Connected Development DB!'));
+    mongoose.connect(database.development.connectionString).then(() => console.log('Connected Development DB!'));
     break;
   case 'production':
-    mongoose.connect(dbConfig.production.connectionString).then(() => console.log('Connected Production DB!'));
+    mongoose.connect(database.production.connectionString).then(() => console.log('Connected Production DB!'));
     break;
   default:
     throw new Error('Unknown execution environment ' + app.get('env'));
 }
 
 // view engine setup
-app.engine('handlebars', hbs.engine({
-  defaultLayout: 'layout',
-  helpers: {
-    add: function (a, b) {
-      return a + b;
-    },
-    isEqual: function (a, b, options) {
-      return a === b ? options.fn(this) : options.inverse(this);
-    },
-    eq: function (a, b) {
-      return a === b;
-    },
-  }
-}));
+app.engine('handlebars', hbsEngine);
 app.set('view engine', 'handlebars');
 
-app.use(ratelimitConfig);
+// common setup
+app.use(commonLimiter);
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(session({ secret: process.env.SESSION_KEY, resave: false, saveUninitialized: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-const indexRouter = require('./routes/index');
 app.use('/', indexRouter);
 
 // catch 404 and forward to error handler
-app.use(function (req, res, next) {
-  next(createError(404));
-});
+app.use(function (req, res, next) { next(createError(404)); });
 
 // error handler
 app.use(function (err, req, res, next) {
@@ -62,16 +51,16 @@ app.use(function (err, req, res, next) {
   const getError = (status) => {
     switch (status) {
       case 401:
-        return { status: 'Error 401', title: 'Unauthorized', message: 'You are not allowed to access this resource.' };
-      case 403:
-        return { status: 'Error 403', title: 'Forbidden', message: 'You do not have permission to access this resource.' };
+        return { status: 'Error 401', title: 'Unauthorized', message: 'Your login session has expired. You are not allowed to access this resource.' };
+      case 429:
+        return { status: 'Error 429', title: 'Sorry', message: 'Too many requests from this IP, please try again later.' };
       default:
         return { status: 'Error 404', title: 'Erm. Page not found', message: 'The requested resource could not be found.' };
     }
   }
 
   res.status(err.status || 500);
-  if (err.status === 401 || err.status === 403 || err.status === 404) {
+  if (err.status === 401 || err.status === 429 || err.status === 404) {
     const error = getError(err.status);
     res.render('error', { layout: null, error: error });
   } else {

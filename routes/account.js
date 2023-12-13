@@ -4,35 +4,13 @@ var router = express.Router();
 const accountController = require('../controllers/account');
 const upload = require('../utils/upload-image');
 const { validate, checkRegister, checkUAccount } = require('../middlewares/validate');
-const { authenticate, isLoggedIn, isAdmin } = require('../middlewares/auth');
+const { isAdmin } = require('../middlewares/auth');
 
 const title = 'Accounts';
 
-router.get('/login', function (req, res) {
-  res.render('account_login', { layout: 'pre_layout', script: 'account_login' });
-});
+router.get('/profile', accountController.renderProfile);
 
-router.post('/login', accountController.login);
-
-router.get('/password/reset', function (req, res) {
-  res.render('account_password_reset', { layout: 'pre_layout', script: 'account_password_reset' });
-});
-
-router.post('/password/reset', accountController.passwordReset);
-
-router.use(authenticate);
-
-router.get('/password/change', function (req, res) {
-  res.render('account_password_change', { layout: 'pre_layout', user: req.user, script: 'account_password_change' });
-});
-
-router.post('/password/change', accountController.passwordChange);
-
-router.use(isLoggedIn);
-
-router.get('/profile', function (req, res) {
-  res.render('account_profile', { title: "Profile", subTitle: 'Profile' });
-});
+router.post('/password/update', accountController.passwordUpdate);
 
 router.use(isAdmin);
 
@@ -45,6 +23,8 @@ router.get('/register', function (req, res) {
 });
 
 router.post('/register', [checkRegister, validate], accountController.register);
+
+router.post('/resendMail', accountController.resendMail);
 
 router.post('/get', accountController.getByID);
 

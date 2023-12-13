@@ -7,7 +7,7 @@ function passwordReset() {
     const value = $('#resetInput').val();
 
     $.ajax({
-        url: '/account/password/reset',
+        url: '/password/reset',
         method: 'POST',
         dataType: 'json',
         data: { value: value },
@@ -16,9 +16,11 @@ function passwordReset() {
         },
         success: function (response) {
             if (response.success) {
-                $('#modal-success-title').text(response.title);
-                $('#modal-success-msg').text(response.message);
-                $('#successModal').modal('show');
+                setTimeout(function () {
+                    $('#modal-success-title').text(response.title);
+                    $('#modal-success-msg').text(response.message);
+                    $('#successModal').modal('show');
+                }, 1000);
             }
         },
         error: function (xhr, status, error) {

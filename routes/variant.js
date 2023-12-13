@@ -4,15 +4,13 @@ var router = express.Router();
 const variantController = require('../controllers/variant');
 const upload = require('../utils/upload-image');
 const { validate, checkVariant, checkUVariant } = require('../middlewares/validate');
-const { authenticate, isAdmin } = require('../middlewares/auth');
-
-// router.use(authenticate);
-
-// router.use(isAdmin);
+const { isAdmin } = require('../middlewares/auth');
 
 router.post('/getAllByProduct', variantController.getAllByProductID);
 
 router.post('/getByBarcode', variantController.getByBarcode);
+
+router.use(isAdmin);
 
 const setRootFolder = (req, res, next) => {
     req.root = {};

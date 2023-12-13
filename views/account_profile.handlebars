@@ -1,22 +1,19 @@
 <div class="page-header min-height-300 border-radius-xl"
-    style="background-image: url('../assets/img/curved-images/curved0.jpg'); background-position-y: 50%;">
+    style="background-image: url('/assets/img/curved-images/curved0.jpg'); background-position-y: 50%;">
     <span class="mask bg-gradient-primary opacity-6"></span>
 </div>
 <div class="card card-body blur shadow-blur mx-4 mt-n6 overflow-hidden">
     <div class="row gx-4">
         <div class="col-auto">
             <div class="avatar avatar-xl position-relative">
-                <img src="../assets/img/team-2.jpg" alt="profile_image" class="w-100 border-radius-lg shadow-sm">
+                <img src="/uploads/accounts/{{profile.avatar}}" alt="profile_image"
+                    class="w-100 border-radius-lg shadow-sm">
             </div>
         </div>
         <div class="col-auto my-auto">
             <div class="h-100">
-                <h5 class="mb-1">
-                    Alec Thompson
-                </h5>
-                <p class="mb-0 font-weight-bold text-sm">
-                    Admin
-                </p>
+                <h5 class="mb-1">{{profile.name}}</h5>
+                <p class="mb-0 font-weight-bold text-sm text-capitalize">{{profile.role}}</p>
             </div>
         </div>
         <div class="col-lg-4 col-md-6 my-sm-auto ms-sm-auto me-sm-0 mx-auto mt-3">
@@ -94,15 +91,19 @@
                     <div class="col-8">
                         <label class="form-label">Full Name</label>
                         <div class="input-group">
-                            <input id="fullname" name="fullname" class="form-control" type="text" required="required"
-                                onfocus="focused(this)">
+                            <input id="name" class="form-control" type="text" value="{{profile.name}}" {{#if (eq
+                                profile.role 'staff' )}} disabled {{/if}}>
                         </div>
                     </div>
                     <div class="col-4">
                         <label class="form-label">I'm</label>
-                        <div class="input-group">
-                            <input id="gender" name="gender" class="form-control" type="text" required="required"
-                                onfocus="focused(this)">
+                        <div class="choices" data-type="select-one">
+                            <select class="form-control" id="gender" {{#if (eq profile.role 'staff' )}} disabled
+                                {{/if}}>
+                                <option value="male" {{#if (eq profile.gender 'male' )}} checked {{/if}}>Male</option>
+                                <option value="female" {{#if (eq profile.gender 'female' )}} checked {{/if}}>Female
+                                </option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -111,20 +112,22 @@
                     <div class="col-4">
                         <label class="form-label mt-4">Birthday</label>
                         <div class="input-group">
-                            <input id="birthday" name="birthday" class="form-control" type="date"
-                                onfocus="focused(this)">
+                            <input id="birthday" class="form-control" type="date" value="{{profile.birthday}}" {{#if (eq
+                                profile.role 'staff' )}} disabled {{/if}}>
                         </div>
                     </div>
                     <div class="col-4">
-                        <label class="form-label mt-4">Email</label>
+                        <label class="form-label mt-4">Gmail</label>
                         <div class="input-group">
-                            <input id="email" name="email" class="form-control" type="email" onfocus="focused(this)">
+                            <input id="gmail" class="form-control" type="email" value="{{profile.gmail}}" {{#if (eq
+                                profile.role 'staff' )}} disabled {{/if}}>
                         </div>
                     </div>
                     <div class="col-4">
                         <label class="form-label mt-4">Phone Number</label>
                         <div class="input-group">
-                            <input id="phone" name="phone" class="form-control" type="text" onfocus="focused(this)">
+                            <input id="phone" class="form-control" type="text" value="{{profile.phone}}" {{#if (eq
+                                profile.role 'staff' )}} disabled {{/if}}>
                         </div>
                     </div>
                 </div>
@@ -132,41 +135,41 @@
                     <div class="col-2">
                         <label class="form-label mt-4 custom-cursor-default-hover">Address</label>
                         <div class="input-group">
-                            <input id="address_num" name="address_num" class="form-control" type="text"
-                                onfocus="focused(this)">
+                            <input id="num" class="form-control" type="text" value="{{profile.address.num}}" {{#if (eq
+                                profile.role 'staff' )}} disabled {{/if}}>
                         </div>
                     </div>
                     <div class="col-4">
                         <label class="form-label mt-4">&nbsp;</label>
                         <div class="input-group">
-                            <input id="address_street" name="address_street" class="form-control" type="text"
-                                onfocus="focused(this)">
+                            <input id="street" class="form-control" type="text" value="{{profile.address.street}}" {{#if
+                                (eq profile.role 'staff' )}} disabled {{/if}}>
                         </div>
                     </div>
                     <div class="col-2">
                         <label class="form-label mt-4">&nbsp;</label>
                         <div class="input-group">
-                            <input id="address_ward" name="address_ward" class="form-control" type="text"
-                                onfocus="focused(this)">
+                            <input id="ward" class="form-control" type="text" value="{{profile.address.ward}}" {{#if (eq
+                                profile.role 'staff' )}} disabled {{/if}}>
                         </div>
                     </div>
                     <div class="col-2">
                         <label class="form-label mt-4">&nbsp;</label>
                         <div class="input-group">
-                            <input id="address_district" name="address_district" class="form-control" type="text"
-                                onfocus="focused(this)">
+                            <input id="district" class="form-control" type="text" value="{{profile.address.district}}"
+                                {{#if (eq profile.role 'staff' )}} disabled {{/if}}>
                         </div>
                     </div>
                     <div class="col-2">
                         <label class="form-label mt-4">&nbsp;</label>
                         <div class="input-group">
-                            <input id="address_city" name="address_city" class="form-control" type="text"
-                                onfocus="focused(this)">
+                            <input id="city" class="form-control" type="text" value="{{profile.address.city}}" {{#if (eq
+                                profile.role 'staff' )}} disabled {{/if}}>
                         </div>
                     </div>
                 </div>
-                <button class="btn bg-gradient-dark btn-sm float-end mt-6 mb-0">Update profile</button>
-
+                <button class="btn bg-gradient-dark btn-sm float-end mt-6 mb-0" {{#if (eq profile.role 'staff' )}}
+                    disabled {{/if}}>Update profile</button>
             </div>
         </div>
 
@@ -177,50 +180,37 @@
             <div class="card-body pt-0">
                 <div class="row">
                     <div class="col-4">
-                        <label class="form-label">Current password</label>
+                        <label class="form-label">
+                            Current password
+                            <span id="cur-pw-err" class="ms-2 text-xxs text-danger"></span>
+                        </label>
                         <div class="form-group">
-                            <input class="form-control" type="password" placeholder="Current password"
-                                onfocus="focused(this)">
+                            <input id="currentPassword" class="form-control" type="password" placeholder="Current password">
                         </div>
                     </div>
                     <div class="col-4">
                         <label class="form-label custom-cursor-default-hover">New password</label>
                         <div class="form-group">
-                            <input class="form-control is-valid" type="password" placeholder="New password"
-                                onfocus="focused(this)">
+                            <input id="newPassword" class="form-control" type="password" placeholder="New password">
                         </div>
                     </div>
                     <div class="col-4">
                         <label class="form-label">Confirm new password</label>
                         <div class="form-group">
-                            <input class="form-control is-invalid" type="password" placeholder="Confirm password"
-                                onfocus="focused(this)">
+                            <input id="confirmPassword" class="form-control" type="password"
+                                placeholder="Confirm password">
                         </div>
                     </div>
                 </div>
 
-
-
                 <h5 class="mt-5">Password requirements</h5>
-                <p class="text-muted mb-2">
-                    Please follow this guide for a strong password:
-                </p>
                 <ul class="text-muted ps-4 mb-0 float-start">
-                    <li>
-                        <span class="text-sm">One special characters</span>
-                    </li>
                     <li>
                         <span class="text-sm">Min 6 characters</span>
                     </li>
-                    <li>
-                        <span class="text-sm">One number (2 are recommended)</span>
-                    </li>
-                    <li>
-                        <span class="text-sm">Change it often</span>
-                    </li>
                 </ul>
-                <button class="btn bg-gradient-dark btn-sm float-end mt-6 mb-0"
-                    onclick="soft.showSwal('success-message')">Update password</button>
+                <button class="btn bg-gradient-dark btn-sm float-end mt-4 mb-0" disabled id="updateBtn"
+                    onclick="passwordUpdate()">Update password</button>
             </div>
         </div>
     </div>

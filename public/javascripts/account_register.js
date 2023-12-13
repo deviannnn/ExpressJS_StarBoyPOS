@@ -37,9 +37,6 @@ function onConfirmButtonClick() {
             method: 'POST',
             dataType: 'json',
             data: data,
-            headers: {
-                'Authorization': 'Bearer '
-            },
             beforeSend: function () {
                 $('#loadingModal').modal('show');
             },

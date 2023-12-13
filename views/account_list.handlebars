@@ -76,6 +76,31 @@
     </div>
 </div>
 
+<!-- Modal Ressend Mail model -->
+<div class="modal fade" id="resendMailModal" tabindex="-1" role="dialog" aria-labelledby="delete-modal"
+    aria-hidden="true">
+    <div class="modal-dialog modal-danger modal-dialog-centered modal-" role="document">
+        <div class="modal-content">
+            <div class="modal-body p-4">
+                <div class="text-center">
+                    <div class="swal2-icon swal2-info swal2-icon-show" style="display: flex; margin-top: 15px;">
+                        <div class="swal2-icon-content"><i class="fas fa-envelope"></i></div>
+                    </div>
+                    <p>You will resend a login link that is valid for <b>1 minute</b>
+                        to <span class="current-account text-bolder"></span>
+                    </p>
+                </div>
+                <div class="d-flex justify-content-center mt-4">
+                    <input type="text" id="resendMailId" hidden>
+                    <button type="button" class="btn btn bg-gradient-success mx-2" data-bs-dismiss="modal"
+                        id="confirm-resend-btn"><i class="fas fa-paper-plane"></i> Send</button>
+                    <button type="button" class="btn bg-gradient-danger mx-1" data-bs-dismiss="modal">No,
+                        Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- Modal Toggle Lock -->
 <div class="modal fade" id="toggleLockModal" tabindex="-1" role="dialog" aria-labelledby="delete-modal"
     aria-hidden="true">
@@ -83,20 +108,26 @@
         <div class="modal-content">
             <div class="modal-body p-4">
                 <div class="text-center">
-                    <div class="swal2-icon swal2-info swal2-icon-show" style="display: flex; margin-top: 15px;">
-                        <div class="swal2-icon-content">?</div>
+                    <div id="lock-status">
+                        <div class="swal2-icon swal2-danger swal2-icon-show" style="display: flex; margin-top: 15px;">
+                            <div class="swal2-icon-content"><i class="fas fa-lock"></i></div>
+                        </div>
+                        <p>
+                            You will <span class="text-bolder text-danger">Lock</span>
+                            <span class="lock-name text-bolder"></span>'s account and
+                            <span class="lock-gender"></span> won't be able to use this website anymore.
+                        </p>
                     </div>
-                    <h3 class="font-weight-bolder opacity-9 mt-4">Are you sure?</h3>
-                    <p id="lock-msg" style="display: none">
-                        You will <span class="text-bolder text-danger">Lock</span>
-                        <span class="lock-name text-bolder"></span>'s account and
-                        <span class="lock-gender"></span> won't be able to use this app anymore.
-                    </p>
-                    <p id="unlock-msg" style="display: none">
-                        You will <span class="text-bolder text-success">Unlock</span>
-                        <span class="lock-name"></span>'s account and
-                        <span class="lock-gender"></span> will continue to be able to use the app.
-                    </p>
+                    <div id="unlock-status">
+                        <div class="swal2-icon swal2-success swal2-icon-show" style="display: flex; margin-top: 15px;">
+                            <div class="swal2-icon-content"><i class="fas fa-unlock"></i></div>
+                        </div>
+                        <p>
+                            You will <span class="text-bolder text-success">Unlock</span>
+                            <span class="lock-name text-bolder"></span>'s account and
+                            <span class="lock-gender"></span> will continue to be able to use this website.
+                        </p>
+                    </div>
                 </div>
                 <div class="d-flex justify-content-center mt-4">
                     <input type="text" id="lockedId" hidden>
@@ -125,7 +156,7 @@
                 <div class="row">
                     <div class="col-3 text-center">
                         <h6>Account Avatar</h6>
-                        <img id="detail-img-account" class="w-70" src="/uploads/default.png">
+                        <img id="detail-img-account" class="w-70" src="/uploads/accounts/default.png">
                     </div>
                     <div class="col-9 text-center">
                         <h6>Account Information</h6>
@@ -307,7 +338,7 @@
                         <div class="swal2-icon-content">!</div>
                     </div>
                     <h3 class="font-weight-bolder opacity-9 mt-4">Are you sure?</h3>
-                    <p>You won't be able to revert this account <span class="del-name-account text-bolder"></span>!</p>
+                    <p>You won't be able to revert this account <span class="current-account text-bolder"></span>!</p>
                 </div>
                 <div class="d-flex justify-content-center mt-4">
                     <input type="text" id="deleteId" hidden>

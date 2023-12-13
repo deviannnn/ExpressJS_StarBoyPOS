@@ -7,24 +7,10 @@ const set = require('lodash/set');
 const { generateJWT } = require('../utils/jwt');
 const { generateId } = require('../utils/auto-id');
 const { sendEmail } = require('../utils/send-mail');
+const { revokedTokens } = require('../middlewares/auth');
 
 const register_mail = path.join(process.cwd(), 'public/assets/html/register_mail.html');
 const password_reset_mail = path.join(process.cwd(), 'public/assets/html/password_reset_mail.html');
-
-const sendPasswordChange = async (gmail, token, template) => {
-    const link = `http://localhost:3000/account/password/change?token=${token}`
-    const mailSubject = 'Confirm your registration';
-    let mailHtml = fs.readFileSync(template, 'utf8');
-    mailHtml = `<p>${mailHtml.replace(/{{LINK_PLACEHOLDER}}/g, link)}</p>`;
-
-    return await sendEmail(gmail, mailSubject, mailHtml);
-}
-
-const hideMailPart = (mail) => {
-    const atIndex = mail.indexOf('@');
-    const visiblePart = mail.substring(0, Math.min(atIndex, 2)) + '****' + mail.substring(atIndex);
-    return visiblePart;
-};
 
 const register = async (req, res) => {
     const { gmail, name, gender, birthday, phone, num, street, ward, district, city } = req.body;
@@ -44,15 +30,15 @@ const register = async (req, res) => {
                 address: { num: num, street: street, ward: ward, district: district, city: city },
                 avatar: 'default.png'
             },
-            // created: {
-            //     Id: req.user.Id,
-            //     name: req.user.name
-            // }
+            created: {
+                Id: req.user.Id,
+                name: req.user.name
+            }
         });
 
         await newAccount.save();
 
-        const token = await generateJWT(newAccount, 'register');
+        const token = await generateJWT(newAccount, 'password_change');
 
         const send = await sendPasswordChange(newAccount.gmail, token, register_mail);
         if (send.success) {
@@ -61,12 +47,11 @@ const register = async (req, res) => {
             return res.status(201).json({ success: true, title: 'Registed!', message: `Account registered successfully but ${send.message}.` });
         }
     } catch (error) {
-        console.log(error.message);
         return res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
 }
 
-const login = async (req, res) => {
+const login = async (req, res, next) => {
     const { username, password } = req.body;
 
     try {
@@ -84,11 +69,23 @@ const login = async (req, res) => {
 
         const token = await generateJWT(account, 'login');
 
+        res.cookie('jwt', token, { httpOnly: true });
+        req.session.hello = account.profile.name;
+
         return res.status(200).json({ success: true, token: token });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
 }
+
+const logout = (req, res) => {
+    const token = req.cookies['jwt'];
+
+    revokedTokens.add(token);
+
+    res.clearCookie('jwt');
+    return res.redirect('/');
+};
 
 const passwordReset = async (req, res) => {
     const value = req.body.value;
@@ -111,8 +108,14 @@ const passwordReset = async (req, res) => {
         if (!account) {
             return res.status(400).json({ success: false, message: 'Account not found.' });
         }
+        if (account.locked === true) {
+            return res.status(400).json({ success: false, message: 'You cannot access the system because your account has been locked.' });
+        }
+        if (account.actived === false) {
+            return res.status(400).json({ success: false, message: 'Please login by clicking on the link in your gmail.' });
+        }
 
-        const token = await generateJWT(account, 'password_reset');
+        const token = await generateJWT(account, 'password_change');
 
         const send = await sendPasswordChange(account.gmail, token, password_reset_mail);
         if (send.success) {
@@ -147,7 +150,7 @@ const passwordChange = async (req, res) => {
         const hashedNewPassword = bcrypt.hashSync(newPassword, 10);
         account.password = hashedNewPassword;
 
-        if (req.user.source === 'register' && account.actived === false) {
+        if (account.actived === false) {
             account.actived = true;
         }
 
@@ -165,9 +168,62 @@ const passwordChange = async (req, res) => {
     }
 };
 
+const passwordUpdate = async (req, res) => {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+    const Id = req.user.Id;
+
+    try {
+        if (newPassword.length >= 6 && newPassword !== confirmPassword) {
+            return res.status(400).json({ success: false, message: 'Passwords do not match.' });
+        }
+
+        const account = await Account.findOne({ Id });
+        if (!account || !bcrypt.compareSync(currentPassword, account.password)) {
+            return res.status(400).json({ success: false, message: 'Invalid current password.' });
+        }
+
+        const hashedNewPassword = bcrypt.hashSync(newPassword, 10);
+        account.password = hashedNewPassword;
+
+        account.updated.push({
+            Id: req.user.Id,
+            name: req.user.name,
+            datetime: Date.now(),
+        });
+
+        await account.save();
+
+        return res.status(200).json({ success: true, title: 'Updated!', message: 'Password updated successfully.' });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+};
+
+const resendMail = async (req, res) => {
+    const { Id } = req.body;
+
+    try {
+        const account = await Account.findOne({ Id });
+        if (!account) {
+            return res.status(400).json({ success: false, message: 'Account not found.' });
+        }
+
+        const token = await generateJWT(account, 'password_change');
+
+        const send = await sendPasswordChange(account.gmail, token, register_mail);
+        if (send.success) {
+            return res.status(200).json({ success: true, title: 'Sent!', message: `Gmail sent successfully.` });
+        } else {
+            return res.status(200).json({ success: false, message: `${send.message}.` });
+        }
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+}
+
 const getAll = async (req, res) => {
     try {
-        const accounts = await Account.find();
+        const accounts = await Account.find({ role: 'staff' });
 
         res.status(200).json({ success: true, accounts: accounts });
     } catch (error) {
@@ -261,4 +317,54 @@ const remove = async (req, res) => {
     }
 };
 
-module.exports = { register, login, passwordReset, passwordChange, getAll, getByID, update, remove };
+const sendPasswordChange = async (gmail, token, template) => {
+    const link = `http://localhost:3000/password/change?token=${token}`
+    const mailSubject = 'Confirm your registration';
+    let mailHtml = fs.readFileSync(template, 'utf8');
+    mailHtml = `<p>${mailHtml.replace(/{{LINK_PLACEHOLDER}}/g, link)}</p>`;
+
+    return await sendEmail(gmail, mailSubject, mailHtml);
+}
+
+const hideMailPart = (mail) => {
+    const atIndex = mail.indexOf('@');
+    const visiblePart = mail.substring(0, Math.min(atIndex, 2)) + '****' + mail.substring(atIndex);
+    return visiblePart;
+};
+
+const renderProfile = async function (req, res, next) {
+    try {
+        const account = await Account.findOne({ Id: req.user.Id });
+        if (!account) {
+            return next(createError(404));
+        }
+
+        const profile = {
+            Id: account.Id,
+            avatar: account.profile.avatar,
+            role: account.role,
+            name: account.profile.name,
+            gender: account.profile.gender,
+            birthday: formatForBirthdayInput(account.profile.birthday),
+            gmail: account.gmail,
+            phone: account.profile.phone,
+            address: account.profile.address
+        };
+
+        res.render('account_profile', { title: "Profile", subTitle: 'Profile', profile: profile, script: 'account_profile' });
+    } catch (error) {
+        return next(error);
+    }
+}
+
+function formatForBirthdayInput(birthdayStr) {
+    const birthdayDate = new Date(birthdayStr);
+
+    const year = birthdayDate.getFullYear();
+    const month = String(birthdayDate.getMonth() + 1).padStart(2, '0');
+    const day = String(birthdayDate.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+}
+
+module.exports = { register, login, logout, passwordReset, passwordChange, passwordUpdate, resendMail, getAll, getByID, update, remove, renderProfile };

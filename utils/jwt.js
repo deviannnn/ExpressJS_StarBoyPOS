@@ -6,7 +6,7 @@ const generateJWT = async (account, source) => {
     try {
         let expiresIn = '24h';
 
-        if (source === 'register' || source === 'password_reset') {
+        if (source === 'password_change') {
             expiresIn = '1m';
         }
 
@@ -35,10 +35,14 @@ const generateJWT = async (account, source) => {
 };
 
 const extractToken = (req) => {
+    if (req.query && req.query.token) {
+        return (req.query).token;
+    }
+    if (req.cookies && req.cookies['jwt']) {
+        return req.cookies['jwt'];
+    }
     if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
         return req.headers.authorization.split(' ')[1];
-    } else if (req.query && req.query.token) {
-        return (req.query).token;
     }
     return null;
 }

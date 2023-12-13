@@ -30448,6 +30448,11 @@ Github: https://github.com/fiduswriter/Simple-DataTables
     color: #3fc3ee
 }
 
+.swal2-icon.swal2-danger {
+    border-color: #ff667c;
+    color: #ff667c
+}
+
 .swal2-icon.swal2-question {
     border-color: #c9dae1;
     color: #87adbd
