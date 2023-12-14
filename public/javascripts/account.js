@@ -24,7 +24,6 @@ function init() {
 
 function displayAccounts(accounts) {
     const tableBody = $('tbody');
-
     tableBody.empty();
 
     accounts.forEach(account => {
@@ -175,7 +174,6 @@ $('#confirm-del-btn').on('click', onConfirmDelButtonClick);
 
 function onConfirmDelButtonClick() {
     const deleteId = getValue('#deleteId');
-    console.log(deleteId);
     $.ajax({
         url: '/account/remove',
         method: 'DELETE',
@@ -190,10 +188,8 @@ function onConfirmDelButtonClick() {
         },
         error: function (xhr, status, error) {
             let msg;
-            console.log(xhr);
             if (xhr.status === 400) {
                 const response = JSON.parse(xhr.responseText);
-                console.log(response);
                 if (response.type === 0 && response.errors && response.errors.length > 0) {
                     const inputError = response.errors;
                     inputError.forEach(input => {

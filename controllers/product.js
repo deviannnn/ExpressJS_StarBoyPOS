@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Product = require('../models/product');
 const Category = require('../models/category');
 const Variant = require('../models/variant');
+const { formatDate } = require('../utils/format');
 
 const create = async (req, res) => {
     const { categoryId, name, specs } = req.body;
@@ -129,8 +130,33 @@ const remove = async (req, res) => {
     }
 };
 
-const goHandleView = async (req, res, next) => {
-    const doAction = req.query.do;
+const renderProductList = async (req, res, next) => {
+    try {
+        let products = await Product.find();
+
+        if (products.length !== 0) {
+            products = await Promise.all(products.map(async (product) => {
+                await product.populate('category');
+                return {
+                    id: product._id.toString().trim(),
+                    img: 'default.png',
+                    name: product.name,
+                    category: product.category.name,
+                    status: product.actived,
+                    specs: product.specs.length > 0 ? product.specs.map((spec) => ({ name: spec.name, option: spec.option })) : null,
+                    updated: product.updated.length > 0 ? formatDate(product.updated[0].datetime) : formatDate(product.created.datetime)
+                };
+            }));
+        }
+
+        res.render('product', { title: "Products", subTitle: 'Product List', products: products });
+    } catch (error) {
+        return next(error);
+    }
+}
+
+const renderHandleView = async (req, res, next) => {
+    const sourceAction = req.query.source;
 
     try {
         const listCategories = await Category.find();
@@ -144,9 +170,7 @@ const goHandleView = async (req, res, next) => {
             }))
         }))
 
-        if (doAction === 'add') {
-            res.render('product-handle', { title: 'Products', subTitle: 'New Product', categories: categories });
-        } else if (doAction === 'edit') {
+        if (sourceAction === 'edit') {
             const productId = req.query.id;
 
             const editProduct = await Product.findOne({ _id: productId });
@@ -188,4 +212,4 @@ const goHandleView = async (req, res, next) => {
     }
 }
 
-module.exports = { goHandleView, getAll, getByID, create, update, remove };
+module.exports = { renderProductList, renderHandleView, getAll, getByID, create, update, remove };

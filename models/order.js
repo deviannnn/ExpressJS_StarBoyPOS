@@ -17,7 +17,7 @@ const orderSchema = new mongoose.Schema({
         totalAmount: { type: Number, required: true }
     },
     items: [{
-        product: { type: mongoose.Schema.Types.ObjectId, ref: 'Variant', required: true },
+        product: { type: String, required: true },
         quantity: { type: Number, required: true },
         price: { type: Number, required: true },
         amount: { type: Number, required: true }

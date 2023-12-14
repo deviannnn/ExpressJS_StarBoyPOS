@@ -113,7 +113,7 @@
                             {{#if (eq user.role 'admin')}}
                             <li class="nav-item ">
                                 <a class="nav-link {{#isEqual subTitle 'New Category'}} active {{/isEqual}}"
-                                    href="/category/handle?do=add">
+                                    href="/category/handle?source=add">
                                     <span class="sidenav-mini-icon"> + </span>
                                     <span class="sidenav-normal"> New Category </span>
                                 </a>
@@ -146,7 +146,7 @@
                             {{#if (eq user.role 'admin')}}
                             <li class="nav-item ">
                                 <a class="nav-link {{#isEqual subTitle 'New Product'}} active {{/isEqual}}"
-                                    href="/product/handle?do=add">
+                                    href="/product/handle?source=add">
                                     <span class="sidenav-mini-icon"> + </span>
                                     <span class="sidenav-normal"> New Product </span>
                                 </a>
@@ -722,6 +722,17 @@
 
     {{#if script}}
     <script src="/javascripts/{{script}}.js"></script>
+    {{else}}
+    <script>
+        $('#example2').DataTable({
+            "paging": true,
+            "lengthChange": false,
+            "searching": false,
+            "ordering": true,
+            "info": true,
+            "autoWidth": false,
+        });
+    </script>
     {{/if}}
 
     <!-- Toggle Light/Dark -->

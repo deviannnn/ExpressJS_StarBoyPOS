@@ -45,7 +45,7 @@ function passwordChange() {
                     $('#successModal').modal('show');
                     setTimeout(function () {
                         window.location.href = '/login';
-                    }, 4000);
+                    }, 3000);
                 }
             },
             error: function (xhr, status, error) {
@@ -53,6 +53,11 @@ function passwordChange() {
                 if (xhr.status === 400) {
                     const response = JSON.parse(xhr.responseText);
                     msg = response.message;
+                } else if (xhr.status === 200) {
+                    msg = 'Perhaps your link has expired';
+                    setTimeout(function () {
+                        window.location.href = '/password/reset';
+                    }, 3000);
                 } else {
                     msg = error;
                 }

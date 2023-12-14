@@ -5,14 +5,12 @@
                 <div class="d-lg-flex">
                     <div class="col-12 col-sm-12 col-md-6">
                         <h5 class="mb-0">Category table</h5>
-                        <p class="text-sm mb-0">
-                            Tip: you can edit the <b>STATUS</b> & <b>LOCKED</b> attributes by clicking on
-                            the tag corresponding to that account
-                        </p>
                     </div>
+                    {{#if (eq user.role 'admin')}}
                     <div class="ms-auto my-auto mt-lg-0 mt-4">
                         <div class="ms-auto my-auto">
-                            <a href="/category/handle?do=add" class="btn bg-gradient-primary btn-sm mb-0">+&nbsp;New Category</a>
+                            <a href="/category/handle?source=add" class="btn bg-gradient-primary btn-sm mb-0">+&nbsp;New
+                                Category</a>
                             <button type="button" class="btn btn-outline-primary btn-sm mb-0" data-bs-toggle="modal"
                                 data-bs-target="#import">Import</button>
                             <div class="modal fade" id="import" tabindex="-1" style="display: none;" aria-hidden="true">
@@ -47,15 +45,18 @@
                                 type="button" name="button">Export</button>
                         </div>
                     </div>
+                    {{/if}}
                 </div>
             </div>
-            <div class="card-body px-0 pt-0 pb-2">
+            <div class="card-body px-0 mt-3 pt-0 pb-2">
                 <div class="table-responsive p-0">
                     <table id="example2" class="table align-items-center mb-0">
                         <thead>
                             <tr>
                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder">
                                     Name</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder ps-2">
+                                    Specifications</th>
                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder ps-2">
                                     Status</th>
                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder ps-2">
@@ -64,56 +65,45 @@
                             </tr>
                         </thead>
                         <tbody>
+                            {{#if categories}}
+                            {{#each categories}}
                             <tr>
                                 <td>
-                                    <span class="text-secondary text-md font-weight-bold px-3">Memory Storage</span>
+                                    <span class="text-secondary text-md font-weight-bold px-3">{{name}}</span>
                                 </td>
+                                {{#if specs}}
                                 <td>
+                                    {{#each specs}}
+                                    <span class="text-secondary text-xs font-weight-bold">{{name}}</span><br>
+                                    {{/each}}
+                                </td>
+                                {{/if}}
+                                <td>
+                                    {{#if (eq status true)}}
                                     <span class="badge badge-sm bg-gradient-success">actived</span>
+                                    {{else}}
+                                    <span class="badge badge-sm bg-gradient-secondary">unactived</span>
+                                    {{/if}}
                                 </td>
                                 <td>
-                                    <span class="text-secondary text-xs font-weight-bold">20/11/2023</span>
+                                    <span class="text-secondary text-xs font-weight-bold">{{updated}}</span>
                                 </td>
-                                <td class="text-center">
-                                    <a href="" class="action-btn detail" data-bs-toggle="tooltip"
-                                        data-bs-original-title="Preview category">
+                                <td>
+                                    <a class="action-btn detail" data-id="{{id}}">
                                         <i class="fas fa-eye text-primary text-gradient" aria-hidden="true"></i>
                                     </a>
-                                    <a href="" class="action-btn edit mx-3" data-bs-toggle="tooltip"
-                                        data-bs-original-title="Edit category">
+                                    {{#if (eq ../user.role 'admin')}}
+                                    <a class="action-btn edit mx-3" href="/category/handle?source=edit&id={{id}}">
                                         <i class="fas fa-pencil-alt text-dark text-gradient" aria-hidden="true"></i>
                                     </a>
-                                    <a href="" class="action-btn delete" data-bs-toggle="tooltip"
-                                        data-bs-original-title="Delete category">
+                                    <a class="action-btn delete" data-id="{{id}}">
                                         <i class="far fa-trash-alt text-danger text-gradient" aria-hidden="true"></i>
                                     </a>
+                                    {{/if}}
                                 </td>
                             </tr>
-                            <tr>
-                                <td>
-                                    <span class="text-secondary text-md font-weight-bold px-3">Memory Storage</span>
-                                </td>
-                                <td>
-                                    <span class="badge badge-sm bg-gradient-success">actived</span>
-                                </td>
-                                <td>
-                                    <span class="text-secondary text-xs font-weight-bold">20/11/2023</span>
-                                </td>
-                                <td class="text-center">
-                                    <a href="" class="action-btn detail" data-bs-toggle="tooltip"
-                                        data-bs-original-title="Preview category">
-                                        <i class="fas fa-eye text-primary text-gradient" aria-hidden="true"></i>
-                                    </a>
-                                    <a href="" class="action-btn edit mx-3" data-bs-toggle="tooltip"
-                                        data-bs-original-title="Edit category">
-                                        <i class="fas fa-pencil-alt text-dark text-gradient" aria-hidden="true"></i>
-                                    </a>
-                                    <a href="" class="action-btn delete" data-bs-toggle="tooltip"
-                                        data-bs-original-title="Delete category">
-                                        <i class="far fa-trash-alt text-danger text-gradient" aria-hidden="true"></i>
-                                    </a>
-                                </td>
-                            </tr>
+                            {{/each}}
+                            {{/if}}
                         </tbody>
                     </table>
                 </div>

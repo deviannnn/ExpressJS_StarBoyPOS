@@ -6,9 +6,11 @@
                     <div class="col-12 col-sm-12 col-md-6">
                         <h5 class="mb-0">Product table</h5>
                     </div>
+                    {{#if (eq user.role 'admin')}}
                     <div class="ms-auto my-auto mt-lg-0 mt-4">
                         <div class="ms-auto my-auto">
-                            <a href="/product/handle?do=add" class="btn bg-gradient-primary btn-sm mb-0">+&nbsp;New Product</a>
+                            <a href="/product/handle?source=add" class="btn bg-gradient-primary btn-sm mb-0">+&nbsp;New
+                                Product</a>
                             <button type="button" class="btn btn-outline-primary btn-sm mb-0" data-bs-toggle="modal"
                                 data-bs-target="#import">Import</button>
                             <div class="modal fade" id="import" tabindex="-1" style="display: none;" aria-hidden="true">
@@ -43,9 +45,10 @@
                                 type="button" name="button">Export</button>
                         </div>
                     </div>
+                    {{/if}}
                 </div>
             </div>
-            <div class="card-body px-0 pt-0 pb-2">
+            <div class="card-body px-0 mt-3 pt-0 pb-2">
                 <div class="table-responsive p-0">
                     <table id="example2" class="table align-items-center mb-0">
                         <thead>
@@ -55,71 +58,60 @@
                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder ps-2">
                                     Category</th>
                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder ps-2">
-                                    Price</th>
-                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder ps-2">
-                                    Quantity</th>
+                                    Specifications</th>
+
                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder ps-2">
                                     Status</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder ps-2">
+                                    Updated</th>
                                 <th></th>
                             </tr>
                         </thead>
                         <tbody>
+                            {{#if products}}
+                            {{#each products}}
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <img src="../assets/img/iphone15-pro.png">
-                                        <h6 class="mb-0 text-sm">iPhone 15</h6>
+                                        <img src="/uploads/product_variants/{{img}}">
+                                        <h6 class="mb-0 text-sm">{{name}}</h6>
                                     </div>
                                 </td>
-                                <td class="text-sm">Smartphone</td>
-                                <td class="text-sm">$1,869</td>
-                                <td class="text-sm">725</td>
+                                <td class="text-sm">{{category}}</td>
+                                {{#if specs}}
                                 <td>
-                                    <span class="badge badge-success badge-sm">in Stock</span>
+                                    {{#each specs}}
+                                    <span class="text-secondary text-xs font-weight-bold">{{name}}:
+                                        {{option}}</span><br>
+                                    {{/each}}
+                                </td>
+                                {{/if}}
+                                <td>
+                                    {{#if (eq status true)}}
+                                    <span class="badge badge-sm bg-gradient-success">actived</span>
+                                    {{else}}
+                                    <span class="badge badge-sm bg-gradient-secondary">unactived</span>
+                                    {{/if}}
+                                </td>
+                                <td>
+                                    <span class="text-secondary text-xs font-weight-bold">{{updated}}</span>
                                 </td>
                                 <td class="text-center">
-                                    <a href="" class="action-btn detail" data-bs-toggle="tooltip"
-                                        data-bs-original-title="Preview category">
+                                    <a class="action-btn detail" data-id="{{id}}">
                                         <i class="fas fa-eye text-primary text-gradient" aria-hidden="true"></i>
                                     </a>
-                                    <a href="" class="action-btn edit mx-3" data-bs-toggle="tooltip"
-                                        data-bs-original-title="Edit category">
+                                    {{#if (eq ../user.role 'admin')}}
+                                    <a class="action-btn edit mx-3" href="/product/handle?source=edit&id={{id}}">
                                         <i class="fas fa-pencil-alt text-dark text-gradient" aria-hidden="true"></i>
                                     </a>
-                                    <a href="" class="action-btn delete" data-bs-toggle="tooltip"
-                                        data-bs-original-title="Delete category">
+                                    <a class="action-btn delete" data-id="{{id}}">
                                         <i class="far fa-trash-alt text-danger text-gradient" aria-hidden="true"></i>
                                     </a>
+                                    {{/if}}
                                 </td>
                             </tr>
-                            <tr>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <img src="../assets/img/iphone15-pro.png">
-                                        <h6 class="mb-0 text-sm">iPhone 15</h6>
-                                    </div>
-                                </td>
-                                <td class="text-sm">Smartphone</td>
-                                <td class="text-sm">$1,569</td>
-                                <td class="text-sm">625</td>
-                                <td>
-                                    <span class="badge badge-danger badge-sm">out of Stock</span>
-                                </td>
-                                <td class="text-center">
-                                    <a href="" class="action-btn detail" data-bs-toggle="tooltip"
-                                        data-bs-original-title="Preview category">
-                                        <i class="fas fa-eye text-primary text-gradient" aria-hidden="true"></i>
-                                    </a>
-                                    <a href="" class="action-btn edit mx-3" data-bs-toggle="tooltip"
-                                        data-bs-original-title="Edit category">
-                                        <i class="fas fa-pencil-alt text-dark text-gradient" aria-hidden="true"></i>
-                                    </a>
-                                    <a href="" class="action-btn delete" data-bs-toggle="tooltip"
-                                        data-bs-original-title="Delete category">
-                                        <i class="far fa-trash-alt text-danger text-gradient" aria-hidden="true"></i>
-                                    </a>
-                                </td>
-                            </tr>
+                            {{/each}}
+                            {{/if}}
                         </tbody>
                     </table>
                 </div>

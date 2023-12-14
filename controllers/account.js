@@ -319,7 +319,7 @@ const remove = async (req, res) => {
 
 const sendPasswordChange = async (gmail, token, template) => {
     const link = `http://localhost:3000/password/change?token=${token}`
-    const mailSubject = 'Confirm your registration';
+    const mailSubject = template === register_mail ? 'Confirm your registration': 'Confirm your password reset';
     let mailHtml = fs.readFileSync(template, 'utf8');
     mailHtml = `<p>${mailHtml.replace(/{{LINK_PLACEHOLDER}}/g, link)}</p>`;
 
