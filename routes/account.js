@@ -15,7 +15,7 @@ router.post('/password/update', accountController.passwordUpdate);
 router.use(isAdmin);
 
 router.get('/', function (req, res) {
-  res.render('account_list', { title: title, subTitle: 'Account List', script: 'account' });
+  res.render('account_list', { title: title, subTitle: 'Account List', script: 'account_list' });
 });
 
 router.get('/register', function (req, res) {

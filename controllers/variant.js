@@ -7,7 +7,7 @@ const create = async (req, res) => {
     try {
         const newVariant = new Variant({
             product: new mongoose.Types.ObjectId(productId),
-            img: req.file ? req.file.filename : 'default-variant.png',
+            img: req.file ? req.file.filename : 'default.png',
             barcode: barcode,
             color: color,
             cost: cost,

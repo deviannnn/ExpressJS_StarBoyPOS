@@ -21412,6 +21412,10 @@ tbody img {
     border-left-width: 1px
 }
 
+.col-2-5 {
+    flex: 0 0 auto;
+    width: 20%;
+}
 /* custom */
 
 .focused {

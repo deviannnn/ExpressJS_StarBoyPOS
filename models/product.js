@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Variant = require('./variant');
 
 const productSchema = new mongoose.Schema({
     category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
@@ -19,6 +20,11 @@ const productSchema = new mongoose.Schema({
         datetime: { type: Date, required: true, default: Date.now },
     }]
 });
+
+productSchema.methods.getVariants = async function () {
+    const productId = this._id;
+    return await Variant.find({ product: productId });
+};
 
 const Product = mongoose.model('Product', productSchema);
 

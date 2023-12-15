@@ -1,4 +1,6 @@
 const Category = require('../models/category');
+const Product = require('../models/product');
+
 const { formatDate } = require('../utils/format');
 
 const create = async (req, res) => {
@@ -78,13 +80,17 @@ const remove = async (req, res) => {
     const { categoryId } = req.body;
 
     try {
-        const deletedCategory = await Category.findOneAndDelete({ _id: categoryId });
+        const productsWithCategory = await Product.find({ category: categoryId });
+        if (productsWithCategory.length > 0) {
+            return res.status(400).json({ success: false, message: 'Cannot delete. There are products associated with it.' });
+        }
 
+        const deletedCategory = await Category.findOneAndDelete({ _id: categoryId });
         if (!deletedCategory) {
             return res.status(404).json({ success: false, message: 'Category not found.' });
         }
 
-        return res.status(200).json({ success: true, title: 'Deleted!', category: deletedCategory });
+        return res.status(200).json({ success: true, title: 'Deleted!', message: 'Category deleted successfully.', category: deletedCategory });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
@@ -201,16 +207,20 @@ const renderCategoryList = async (req, res, next) => {
         let categories = await Category.find();
 
         if (categories.length !== 0) {
-            categories = categories.map((category) => ({
-                id: category._id.toString().trim(),
-                name: category.name,
-                status: category.actived,
-                specs: category.specs.length > 0 ? category.specs.map((spec) => ({ name: spec.name })) : null,
-                updated: category.updated.length > 0 ? formatDate(category.updated[0].datetime) : formatDate(category.created.datetime)
+            categories = await Promise.all(categories.map(async (category) => {
+                const productsWithCategory = await Product.find({ category: category._id.toString().trim() });
+                return {
+                    id: category._id.toString().trim(),
+                    name: category.name,
+                    status: category.actived,
+                    specs: category.specs.length > 0 ? category.specs.map((spec) => ({ name: spec.name })) : null,
+                    updated: category.updated.length > 0 ? formatDate(category.updated[category.updated.length - 1].datetime) : formatDate(category.created.datetime),
+                    del: productsWithCategory.length > 0 ? false : true
+                }
             }))
         }
 
-        res.render('category', { title: "Categories", subTitle: 'Category List', categories: categories });
+        res.render('category_list', { title: "Categories", subTitle: 'Category List', categories: categories, script: 'category_list' });
     } catch (error) {
         return next(error);
     }
@@ -220,10 +230,8 @@ const renderHandleView = async (req, res, next) => {
     const sourceAction = req.query.source;
 
     if (sourceAction === 'edit') {
-        const categoryId = req.query.id;
-
         try {
-            const editCategory = await Category.findOne({ _id: categoryId });
+            const editCategory = await Category.findOne({ _id: req.query.id });
             if (!editCategory) {
                 return next();
             }
@@ -234,13 +242,12 @@ const renderHandleView = async (req, res, next) => {
                 id: spec._id.toString()
             }));
             const category = { id, name: editCategory.name, specs };
-            res.render('category_handle', { title: 'Categories', subTitle: 'Edit Category', category: category, script: 'category_handle' });
+            res.render('category_handle', { title: 'Categories', subTitle: 'Edit Category', category: category, script: 'category_handle_edit' });
         } catch (error) {
             return next();
         }
-
     } else {
-        res.render('category_handle', { title: 'Categories', subTitle: 'New Category', script: 'category_handle' });
+        res.render('category_handle', { title: 'Categories', subTitle: 'New Category', script: 'category_handle_add' });
     }
 }
 

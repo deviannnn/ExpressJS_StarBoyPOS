@@ -186,19 +186,23 @@ const checkSpecsCategory = [
         .matches(/^[\p{L}\s]*$/u).withMessage('Specification\'s name should only contain letters and spaces.'),
 
     check('options')
-        .isArray().withMessage('Invalid options array.')
+        .isArray().withMessage('Invalid options.')
         .custom((options, { req }) => {
-            if (options.length === 0) {
-                throw new Error('Options array should not be empty.');
-            }
-
-            options.forEach((option, index) => {
-                if (!option || typeof option !== 'string' || option.trim() === '') {
-                    throw new Error(`Invalid option at index ${index}. Options should be strings.`);
+            if (options) {
+                if (options.length === 0) {
+                    throw new Error('Options should not be empty.');
                 }
-            });
 
-            return true;
+                options.forEach((option, index) => {
+                    if (!option || typeof option !== 'string' || option.trim() === '') {
+                        throw new Error(`Invalid option at index ${index}. Options should be strings.`);
+                    }
+                });
+
+                return true;
+            } else {
+                throw new Error('Options should not be empty.');
+            }
         })
 ];
 
@@ -210,27 +214,6 @@ const checkProduct = [
     check('name')
         .not().isEmpty().withMessage('Product\'s name cannot be empty.')
         .isString().withMessage('Product\'s color must be a string.'),
-
-    check('specs')
-        .optional()
-        .isArray().withMessage('Invalid specifications.')
-        .custom((specs, { req }) => {
-            if (!Array.isArray(specs) || specs.length === 0) {
-                throw new Error('Specifications are required.');
-            }
-
-            specs.forEach((spec, index) => {
-                if (!spec.name || typeof spec.name !== 'string' || !/^[\p{L}\s]+$/u.test(spec.name.trim())) {
-                    throw new Error('Invalid specification name format. It should only contain letters and spaces.');
-                }
-
-                if (!spec.option || typeof spec.option !== 'string' || spec.option.trim() === '') {
-                    throw new Error(`Invalid option at index ${index}. Options should be strings.`);
-                }
-            });
-
-            return true;
-        }),
 ];
 
 const checkUProduct = [
@@ -251,24 +234,7 @@ const checkUProduct = [
 
     check('specs')
         .optional()
-        .isArray().withMessage('Invalid specifications.')
-        .custom((specs, { req }) => {
-            if (!Array.isArray(specs) || specs.length === 0) {
-                throw new Error('Specifications are required.');
-            }
-
-            specs.forEach((spec, index) => {
-                if (!spec.name || typeof spec.name !== 'string' || !/^[\p{L}\s]+$/u.test(spec.name.trim())) {
-                    throw new Error('Invalid specification name format. It should only contain letters and spaces.');
-                }
-
-                if (!spec.option || typeof spec.option !== 'string' || spec.option.trim() === '') {
-                    throw new Error(`Invalid option at index ${index}. Options should be strings.`);
-                }
-            });
-
-            return true;
-        }),
+        .isArray().withMessage('Invalid specifications.'),
 
     check('actived')
         .optional()

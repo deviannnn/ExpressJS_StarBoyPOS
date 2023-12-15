@@ -1,13 +1,6 @@
-$('#next-cate').click(() => {
-    $('#next-Modal').modal('show');
-});
-
-$('#confirm-cate').click(() => {
-    window.location.href = '/category/handle?source=edit&id=6571cf6e7edda196e162f2f2'
-});
-
 $('#edit-name-cate').click(() => {
-    $('#name').prop('disabled', false);
+    const status = $('#name').prop('disabled');
+    $('#name').prop('disabled', !status);
 });
 
 $('#name').on('blur', () => {
@@ -71,7 +64,7 @@ $('#specs-area').on('click', '.edit, .delete', function () {
 
                     case $(clickedElement).hasClass('delete'):
                         $('.current-spec').text(`(${spec.name})`);
-                        $('#deleteId').val(spec._id);
+                        $('#delete-spec-id').val(spec._id);
                         $('#deleteSpecModal').modal('show');
                         break;
 
@@ -81,7 +74,7 @@ $('#specs-area').on('click', '.edit, .delete', function () {
             }
         },
         error: function (xhr, status, error) {
-            let msg;
+            let msg = '';
             if (xhr.status === 400) {
                 const response = JSON.parse(xhr.responseText);
                 msg = response.message;
@@ -94,57 +87,144 @@ $('#specs-area').on('click', '.edit, .delete', function () {
     });
 });
 
+function addOptionField(type) {
+    $(`#${type}-options-area`).append(`
+        <div class="col-6 col-lg-4 mb-3 options-container">
+            <div class="d-flex">
+                <input class="form-control options ${type}" type="text">
+                <a href="" class="input-group-text delete-options">
+                    <i class="fas fa-minus text-danger"></i>
+                </a>
+            </div>
+        </div>`);
+}
+
+$('.modal').on('click', '.delete-options', function (e) {
+    e.preventDefault();
+    $(this).closest('.options-container').remove();
+});
+
 // Add
-function addSpecs() {
+function addSpec() {
     const categoryId = $('#categoryId').val();
     const name = $('#spec-name').val();
 
     const options = [];
-    $('.options').each(function () {
+    $('.options.add').each(function () {
         const optionValue = $(this).val();
         if (optionValue.trim() !== '') {
             options.push(optionValue);
         }
     });
 
-    const requestData = {
-        categoryId: categoryId,
-        name: name,
-        options: options
-    };
-
-    console.log(requestData)
+    $.ajax({
+        url: '/category/addSpecs',
+        method: 'POST',
+        dataType: 'json',
+        data: { categoryId, name, options },
+        success: function (response) {
+            if (response.success) {
+                $('#modal-success-title').text(response.title);
+                $('#modal-success-msg').text(response.message);
+                $('#successModal').modal('show');
+            }
+        },
+        error: function (xhr, status, error) {
+            let msg = '';
+            if (xhr.status === 400) {
+                const response = JSON.parse(xhr.responseText);
+                if (response.type === 0 && response.errors && response.errors.length > 0) {
+                    const inputError = response.errors;
+                    inputError.forEach(input => {
+                        $(`#${input.field}`).removeClass('is-valid').addClass('is-invalid');
+                        msg += input.msg + '<br>';
+                    })
+                } else {
+                    msg = response.message;
+                }
+            } else {
+                msg = error;
+            }
+            $('#message-modal-fail').html(msg);
+            $('#failModal').modal('show');
+        }
+    });
 }
 
 // Edit
 function displaySpecEdit(spec) {
-    $('#edit-id').val(spec._id);
-    $('#edit-name').val(spec.name);
+    $('#edit-spec-id').val(spec._id);
+    $('#edit-spec-name').val(spec.name);
 
     const area = $('#edit-options-area');
     area.empty();
 
     spec.options.forEach(opt => {
-        const row = $('<div class="col-4 mb-3">');
-        row.append(`
-            <div class="d-flex">
-                <input class="form-control options" type="text" value="${opt}" name="options">
-                <a href="" class="input-group-text delete-options">
-                    <i class="fas fa-minus text-danger"></i>
-                </a>
+        area.append(`
+            <div class="col-6 col-lg-4 mb-3 options-container">
+                <div class="d-flex">
+                    <input class="form-control options edit" type="text" value="${opt}">
+                    <a href="" class="input-group-text delete-options">
+                        <i class="fas fa-minus text-danger"></i>
+                    </a>
+                </div>
             </div>`);
-        area.append(row);
     })
 
     $('#editSpecModal').modal('show');
 }
 
-// Delete
-$('#confirm-del-btn').on('click', onConfirmDelButtonClick);
-
-function onConfirmDelButtonClick() {
+function editSpec() {
     const categoryId = $('#categoryId').val();
-    const specId = $('#deleteId').val();
+    const specId = $('#edit-spec-id').val();
+    const name = $('#edit-spec-name').val();
+
+    const options = [];
+    $('.options.edit').each(function () {
+        const optionValue = $(this).val();
+        if (optionValue.trim() !== '') {
+            options.push(optionValue);
+        }
+    });
+
+    $.ajax({
+        url: '/category/updateSpecs',
+        method: 'PUT',
+        dataType: 'json',
+        data: { categoryId, specId, name, options },
+        success: function (response) {
+            if (response.success) {
+                $('#modal-success-title').text(response.title);
+                $('#modal-success-msg').text(response.message);
+                $('#successModal').modal('show');
+            }
+        },
+        error: function (xhr, status, error) {
+            let msg = '';
+            if (xhr.status === 400) {
+                const response = JSON.parse(xhr.responseText);
+                if (response.type === 0 && response.errors && response.errors.length > 0) {
+                    const inputError = response.errors;
+                    inputError.forEach(input => {
+                        $(`#${input.field}`).removeClass('is-valid').addClass('is-invalid');
+                        msg += input.msg + '<br>';
+                    })
+                } else {
+                    msg = response.message;
+                }
+            } else {
+                msg = error;
+            }
+            $('#message-modal-fail').html(msg);
+            $('#failModal').modal('show');
+        }
+    });
+}
+
+// Delete
+function confirmDel() {
+    const categoryId = $('#categoryId').val();
+    const specId = $('#delete-spec-id').val();
 
     $.ajax({
         url: '/category/removeSpecs',

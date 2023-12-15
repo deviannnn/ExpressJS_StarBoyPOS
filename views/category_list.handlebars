@@ -77,6 +77,8 @@
                                     <span class="text-secondary text-xs font-weight-bold">{{name}}</span><br>
                                     {{/each}}
                                 </td>
+                                {{else}}
+                                <td></td>
                                 {{/if}}
                                 <td>
                                     {{#if (eq status true)}}
@@ -96,8 +98,9 @@
                                     <a class="action-btn edit mx-3" href="/category/handle?source=edit&id={{id}}">
                                         <i class="fas fa-pencil-alt text-dark text-gradient" aria-hidden="true"></i>
                                     </a>
-                                    <a class="action-btn delete" data-id="{{id}}">
-                                        <i class="far fa-trash-alt text-danger text-gradient" aria-hidden="true"></i>
+                                    <a class="action-btn {{#if (eq del true)}} delete {{else}} cannot-delete {{/if}}" data-id="{{id}}">
+                                        <i class="far fa-trash-alt {{#if (eq del true)}}text-danger text-gradient{{else}}text-secondary{{/if}}"
+                                            aria-hidden="true"></i>
                                     </a>
                                     {{/if}}
                                 </td>
@@ -106,6 +109,75 @@
                             {{/if}}
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal Detail -->
+<div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="detail-modal" aria-hidden="true"
+    style="--bs-modal-width: 700px;">
+    <div class="modal-dialog modal- modal-dialog-centered modal-" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-bolder">Category Detail</h5>
+                <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-12">
+                        <h6 class="text-center">Category Information</h6>
+                        <div class="row">
+                            <div class="col-12 d-flex">
+                                <h6 class="col-2-5">Name:</h6>
+                                <span class="me-2" id="detail-name-category"></span>
+                            </div>
+                            <div class="col-12 d-flex">
+                                <h6 class="col-2-5">Specifications:</h6>
+                                <span id="detail-specs-category"></span>
+                            </div>
+                            <div class="col-12 mt-2 d-flex">
+                                <h6 class="col-2-5 m-0">Status:</h6>
+                                <span id="detail-status-category"></span>
+                            </div>
+                            <div class="col-12 mt-2 d-flex">
+                                <h6 class="col-2-5">Created Date:</h6>
+                                <span id="detail-created-category"></span>
+                            </div>
+                            <div class="col-12 d-flex">
+                                <h6 class="col-2-5">Latest Updated:</h6>
+                                <span id="detail-updated-category"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn bg-gradient-secondary ml-auto" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal Delete -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="delete-modal" aria-hidden="true">
+    <div class="modal-dialog modal-danger modal-dialog-centered modal-" role="document">
+        <div class="modal-content">
+            <div class="modal-body p-4">
+                <div class="text-center">
+                    <div class="swal2-icon swal2-warning swal2-icon-show" style="display: flex; margin-top: 15px;">
+                        <div class="swal2-icon-content">!</div>
+                    </div>
+                    <h3 class="font-weight-bolder opacity-9 mt-4">Are you sure?</h3>
+                    <p>You won't be able to revert this category <span class="current-category text-bolder"></span>!</p>
+                </div>
+                <div class="d-flex justify-content-center mt-4">
+                    <input type="text" id="delete-category-id" hidden>
+                    <button type="button" class="btn btn bg-gradient-success mx-2" data-bs-dismiss="modal"
+                        onclick="confirmDel()">Yes, Delete it!</button>
+                    <button type="button" class="btn bg-gradient-danger mx-1" data-bs-dismiss="modal">No,
+                        Cancel</button>
                 </div>
             </div>
         </div>

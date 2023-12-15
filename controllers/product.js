@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Product = require('../models/product');
 const Category = require('../models/category');
-const Variant = require('../models/variant');
+
 const { formatDate } = require('../utils/format');
 
 const create = async (req, res) => {
@@ -45,10 +45,15 @@ const getByID = async (req, res) => {
     const { productId } = req.body;
 
     try {
-        const product = await Product.findOne({ _id: productId });
+        let product = await Product.findOne({ _id: productId });
         if (!product) {
             return res.status(400).json({ success: false, message: 'Product not found.' });
         }
+
+        await product.populate('category');
+        const variants = await product.getVariants();
+        
+        product = { ...product._doc, variants };
 
         return res.status(200).json({ success: true, product: product });
     } catch (error) {
@@ -144,12 +149,12 @@ const renderProductList = async (req, res, next) => {
                     category: product.category.name,
                     status: product.actived,
                     specs: product.specs.length > 0 ? product.specs.map((spec) => ({ name: spec.name, option: spec.option })) : null,
-                    updated: product.updated.length > 0 ? formatDate(product.updated[0].datetime) : formatDate(product.created.datetime)
+                    updated: product.updated.length > 0 ? formatDate(product.updated[product.updated.length - 1].datetime) : formatDate(product.created.datetime)
                 };
             }));
         }
 
-        res.render('product', { title: "Products", subTitle: 'Product List', products: products });
+        res.render('product_list', { title: "Products", subTitle: 'Product List', products: products });
     } catch (error) {
         return next(error);
     }
@@ -157,58 +162,20 @@ const renderProductList = async (req, res, next) => {
 
 const renderHandleView = async (req, res, next) => {
     const sourceAction = req.query.source;
-
-    try {
-        const listCategories = await Category.find();
-
-        const categories = listCategories.map(category => ({
-            id: category._id.toString().trim(),
-            name: category.name,
-            specs: category.specs.map(spec => ({
-                name: spec.name,
-                options: spec.options.map(option => option.toString())
-            }))
-        }))
-
-        if (sourceAction === 'edit') {
-            const productId = req.query.id;
-
-            const editProduct = await Product.findOne({ _id: productId });
+    if (sourceAction === 'edit') {
+        try {
+            const editProduct = await Product.findOne({ _id: req.query.id });
             if (!editProduct) {
                 return next();
             }
 
-            const product = {
-                id: editProduct._id.toString().trim(),
-                category: editProduct.category.toString().trim(),
-                name: editProduct.name,
-                specs: editProduct.specs.map(spec => ({
-                    name: spec.name,
-                    option: spec.option,
-                    id: spec._id.toString().trim()
-                }))
-            };
+            res.render('product_handle', { title: 'Products', subTitle: 'Edit Product', source: sourceAction, script: 'product_handle_edit' });
 
-            let variants = await Variant.find({ product: productId });
-            if (variants.length !== 0) {
-                variants = variants.map((variant) => ({
-                    barcode: variant.barcode,
-                    img: variant.img,
-                    color: variant.color,
-                    quantity: variant.quantity,
-                    cost: variant.cost,
-                    price: variant.price,
-                    warn: variant.warn,
-                    actived: variant.actived
-                }))
-            }
-
-            res.render('product-handle', { title: 'Products', subTitle: 'Edit Product', categories: categories, product: product, variants: variants });
-        } else {
-            res.render('product-handle', { title: 'Products', subTitle: 'New Product', categories: categories });
+        } catch (error) {
+            return next();
         }
-    } catch (error) {
-        return next();
+    } else {
+        res.render('product_handle', { title: 'Products', subTitle: 'New Product', source: sourceAction, script: 'product_handle_add' });
     }
 }
 
