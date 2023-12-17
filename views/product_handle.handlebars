@@ -11,7 +11,7 @@
             <div class="modal-dialog modal- modal-dialog-centered modal-" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h6 class="modal-title" id="modal-title-default"><b>Verify Account Creation</b>
+                        <h6 class="modal-title" id="modal-title-default"><b>Verify Product Creation</b>
                         </h6>
                         <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">×</span>
@@ -90,12 +90,12 @@
     </div>
 </div>
 
-<!-- Modal Add Var -->
+<!-- Modal (Add, Edit) -->
 <div class="modal fade" id="varModal" tabindex="-1" role="dialog" style="--bs-modal-width: 900px;">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 id="varTittle" class="modal-title text-bolder">New Product Variant</h5>
+                <h5 id="varTittle" class="modal-title text-bolder">New Variant</h5>
                 <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">×</span>
                 </button>
@@ -110,8 +110,8 @@
                         <div class="d-flex ms-4 mt-4">
                             <button class="btn bg-gradient-primary btn-sm mb-0 me-2" type="button"
                                 onclick="chooseImg()">Edit</button>
-                            <button class="btn btn-outline-dark btn-sm mb-0" type="button"
-                                onclick="removeImg()">Remove</button>
+                            <button id="removeImg" class="btn btn-outline-dark btn-sm mb-0"
+                                type="button">Remove</button>
                         </div>
                     </div>
                     <div class="col-lg-8 mt-lg-0 mt-4">
@@ -182,8 +182,178 @@
         </div>
     </div>
 </div>
-
-<!-- Modal Delete Var -->
+<!-- Modal Detail -->
+<div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="detail-modal" aria-hidden="true"
+    style="--bs-modal-width: 900px;">
+    <div class="modal-dialog modal- modal-dialog-centered modal-" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-bolder">Variant Detail</h5>
+                <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-3 text-center">
+                        <h6>Variant Image</h6>
+                        <img id="detail-img-variant" class="w-lg-70 w-30" src="/uploads/product_variants/default.png">
+                    </div>
+                    <div class="col-lg-9 mt-lg-0 mt-4">
+                        <h6 class="text-center">Variant Information</h6>
+                        <div class="row">
+                            <div class="col-12 d-flex">
+                                <h6 class="col-2-5">Barcode:</h6>
+                                <span id="detail-barcode-variant"></span>
+                            </div>
+                            <div class="col-12 d-flex">
+                                <h6 class="col-2-5">Color:</h6>
+                                <span id="detail-color-variant"></span>
+                            </div>
+                            <div class="col-12 d-flex">
+                                <h6 class="col-2-5">Cost:</h6>
+                                <span id="detail-cost-variant"></span>
+                            </div>
+                            <div class="col-12 d-flex">
+                                <h6 class="col-2-5">Price:</h6>
+                                <span id="detail-price-variant"></span>
+                            </div>
+                            <div class="col-12 d-flex">
+                                <h6 class="col-2-5">Quantity:</h6>
+                                <span id="detail-quantity-variant"></span>
+                            </div>
+                            <div class="col-12 d-flex">
+                                <h6 class="col-2-5">Warn:</h6>
+                                <span id="detail-warn-variant"></span>
+                            </div>
+                            <div class="col-12 d-flex">
+                                <h6 class="col-2-5 m-0">Status:</h6>
+                                <span id="detail-status-variant"></span>
+                            </div>
+                            <div class="col-12 mt-2 d-flex">
+                                <h6 class="col-2-5">Created Date:</h6>
+                                <span id="detail-created-variant"></span>
+                            </div>
+                            <div class="col-12 d-flex">
+                                <h6 class="col-2-5">Latest Updates:</h6>
+                                <span id="detail-updated-variant"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn bg-gradient-secondary ml-auto" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal Timeline -->
+<div class="modal fade" id="timelineModal" tabindex="-1" role="dialog" aria-labelledby="timeline-modal"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-bolder">Variant Timeline <span class="current-var"></span></h5>
+                <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="card">
+                    <div class="card-body p-3">
+                        <div class="timeline timeline-one-side" data-timeline-axis-style="dotted">
+                            <div class="timeline-block mb-3">
+                                <span class="timeline-step">
+                                    <i class="ni ni-cart text-success text-gradient"></i>
+                                </span>
+                                <div class="timeline-content">
+                                    <h6 class="text-dark text-sm font-weight-bold mb-0">Sold: -2</h6>
+                                    <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">21 DEC 9:34 PM
+                                    </p>
+                                    <p class="text-sm mt-3 mb-2">
+                                        By Staff_1 to WG Customer
+                                    </p>
+                                    <span class="badge badge-sm bg-gradient-success">Server</span>
+                                    <span class="badge badge-sm bg-gradient-success">Payments</span>
+                                </div>
+                            </div>
+                            <div class="timeline-block mb-3">
+                                <span class="timeline-step">
+                                    <i class="fas fa-pencil-alt text-dark text-gradient"></i>
+                                </span>
+                                <div class="timeline-content">
+                                    <h6 class="text-dark text-sm font-weight-bold mb-0">Edited: +2</h6>
+                                    <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">21 DEC 9:34 PM
+                                    </p>
+                                    <p class="text-sm mt-3 mb-2">
+                                        By Admin_1
+                                    </p>
+                                    <span class="badge badge-sm bg-gradient-dark">Server</span>
+                                    <span class="badge badge-sm bg-gradient-dark">Payments</span>
+                                </div>
+                            </div>
+                            <div class="timeline-block">
+                                <span class="timeline-step">
+                                    <i class="ni ni-box-2 text-warning text-gradient"></i>
+                                </span>
+                                <div class="timeline-content">
+                                    <h6 class="text-dark text-sm font-weight-bold mb-0">Imported: +20</h6>
+                                    <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">14 DEC</p>
+                                    <p class="text-sm mt-3 mb-2">
+                                        By Admin_1 with Supplier_2
+                                    </p>
+                                    <span class="badge badge-sm bg-gradient-warning">Request</span>
+                                    <span class="badge badge-sm bg-gradient-warning">Priority</span>
+                                </div>
+                            </div>
+                            <div class="alert alert-light m-0" role="alert">
+                                <strong>Ooops!</strong> There is no timeline for this variant yet!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal Toggle Active -->
+<div class="modal fade" id="toggleActiveModal" tabindex="-1" role="dialog" aria-labelledby="active-modal"
+    aria-hidden="true">
+    <div class="modal-dialog modal-danger modal-dialog-centered modal-" role="document">
+        <div class="modal-content">
+            <div class="modal-body p-4">
+                <div class="text-center">
+                    <div id="unactive-status">
+                        <div class="swal2-icon swal2-danger swal2-icon-show" style="display: flex; margin-top: 15px;">
+                            <div class="swal2-icon-content"><i class="fas fa-lock"></i></div>
+                        </div>
+                        <p>You will stop activities related to this variant 
+                            <span class="current-var text-bolder"></span>!
+                        </p>
+                    </div>
+                    <div id="active-status">
+                        <div class="swal2-icon swal2-success swal2-icon-show" style="display: flex; margin-top: 15px;">
+                            <div class="swal2-icon-content"><i class="fas fa-unlock"></i></div>
+                        </div>
+                        <p>You will enable activities related to this variant 
+                            <span class="current-var text-bolder"></span>!
+                        </p>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-center mt-4">
+                    <input type="text" id="actived-var-barcode" hidden>
+                    <input type="text" id="activedValue" hidden>
+                    <button type="button" class="btn btn bg-gradient-success mx-2" data-bs-dismiss="modal"
+                        onclick="changeVarActived()">Yes!</button>
+                    <button type="button" class="btn bg-gradient-danger mx-1" data-bs-dismiss="modal">No,
+                        Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal Delete -->
 <div class="modal fade" id="deleteVarModal" tabindex="-1" role="dialog" aria-labelledby="delete-modal"
     aria-hidden="true">
     <div class="modal-dialog modal-danger modal-dialog-centered modal-" role="document">

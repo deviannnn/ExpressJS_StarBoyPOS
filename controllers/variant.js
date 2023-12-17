@@ -152,9 +152,9 @@ const uploadImg = async (req, res) => {
             uploadVariant.img = req.file.filename;
             await uploadVariant.save();
 
-            return res.status(200).json({ success: true, title: 'Uploaded!', message: 'Image uploaded successfully.', variant: uploadVariant });
+            return res.status(200).json({ success: true });
         } else {
-            return res.status(400).json({ success: false, message: 'No image to upload.' });
+            return res.status(400).json({ success: false });
         }
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Internal Server Error' });

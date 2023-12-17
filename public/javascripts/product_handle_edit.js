@@ -115,7 +115,7 @@ function displayVariants(variants) {
                 <li class="list-group-item border-0 d-flex p-4 mb-2 bg-gray-100 border-radius-lg">
                     <div class="row w-100">
                         <div class="col-3 d-flex flex-column align-items-center">
-                            <span class="badge ${getStatusBadgeClass(variant.status)} badge-sm mb-2">${variant.status}</span>
+                            <span class="badge ${getBadgeClass(variant.status, 'status')} badge-sm mb-2">${variant.status}</span>
                             <img class="product-img text-center" src="/uploads/product_variants/${variant.img !== 'default.png' ? `${productId}/` : ''}${variant.img}">
                         </div>
                         <div class="col-12 col-sm-9 d-flex flex-column">
@@ -128,16 +128,16 @@ function displayVariants(variants) {
                                     <span class="text-dark font-weight-bold ms-sm-2">${variant.quantity}</span>
                                 </span>
                                 <span class="col-6 mb-2 text-xs">Cost:&nbsp;
-                                    <span class="text-dark font-weight-bold ms-sm-2">${variant.cost} VND</span>
+                                    <span class="text-dark font-weight-bold ms-sm-2">${formatCurrency(variant.cost)}</span>
                                 </span>
                                 <span class="col-6 mb-2 text-xs">Warn:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                     <span class="text-dark font-weight-bold ms-sm-2">${variant.warn}</span>
                                 </span>
                                 <span class="col-6 mb-2 text-xs">Price:
-                                    <span class="text-dark font-weight-bold ms-sm-2">${variant.price} VND</span>
+                                    <span class="text-dark font-weight-bold ms-sm-2">${formatCurrency(variant.price)}</span>
                                 </span>
                                 <span class="col-6 mb-2 text-xs">Status:&nbsp;
-                                    <span data-barcode=${variant.barcode} class="btn status badge badge-sm bg-gradient-${variant.actived === true ? 'success' : 'secondary'}">${variant.actived === true ? 'actived' : 'unactived'}</span>
+                                    <span data-barcode=${variant.barcode} class="btn status badge badge-sm ${getBadgeClass(variant.actived, 'actived')}">${variant.actived ? 'actived' : 'unactived'}</span>
                                 </span>
                             </div>
                         </div>
@@ -151,8 +151,11 @@ function displayVariants(variants) {
                             <i class="far fa-trash-alt me-2" aria-hidden="true"></i>
                             Delete
                         </a>
-                        <span class="col-lg-6"></span>
-                        <a class="col-lg-6 btn btn-link m-0 ps-0 text-primary text-gradient" data-barcode=${variant.barcode}>
+                        <a class="col-lg-6 time btn btn-link m-0 ps-0 text-warning text-gradient" data-barcode=${variant.barcode}>
+                            <i class="fas fa-history text-primary me-2" aria-hidden="true"></i>
+                            Time
+                        </a>
+                        <a class="col-lg-6 detail btn btn-link m-0 ps-0 text-primary text-gradient" data-barcode=${variant.barcode}>
                             <i class="fas fa-eye text-primary me-2" aria-hidden="true"></i>
                             Detail
                         </a>
@@ -228,13 +231,17 @@ function updateProduct() {
 
 // Add Variant
 function displayVarAdd() {
-    $('#varTittle').text("New Product Variant");
+    $('#varTittle').text("New Variant");
     $('#auto').prop('checked', true);
     $('#custom').prop('checked', false);
     $('#barcode').prop('disabled', true);
     $('#addBtn').show();
     $('#editBtn').hide();
     autoBarcode();
+    $('#removeImg').click(() => {
+        $('#preview').attr('src', '/uploads/product_variants/default.png');
+        $('#img').val('');
+    });
     $('#varModal').modal('show');
 }
 
@@ -261,7 +268,7 @@ function addVariant() {
             if (response.success) {
                 $('#modal-success-title').text(response.title);
                 if ($('#img')[0].files.length > 0) {
-                    uploadImage(response.variant.barcode, productId);
+                    uploadImg(response.variant.barcode, productId);
                 } else {
                     $('#modal-success-msg').html('Variant created successfully with <b class="text-warning text-gradient">Default image</b>.');
                     $('#successModal').modal('show');
@@ -291,7 +298,7 @@ function addVariant() {
 }
 
 // Handler
-$('#variants-list').on('click', '.edit, .delete, .status', function () {
+$('#variants-list').on('click', '.detail, .edit, .delete, .time, .status', function () {
     const barcode = $(this).data("barcode");
 
     const clickedElement = this;
@@ -306,6 +313,10 @@ $('#variants-list').on('click', '.edit, .delete, .status', function () {
                 const variant = response.variant;
 
                 switch (true) {
+                    case $(clickedElement).hasClass('detail'):
+                        displayVarDetail(variant);
+                        break;
+
                     case $(clickedElement).hasClass('edit'):
                         localStorage.setItem('selectedBarcode', variant.barcode);
                         displayVarEdit(variant);
@@ -315,6 +326,15 @@ $('#variants-list').on('click', '.edit, .delete, .status', function () {
                         $('.current-var').text(`(${variant.barcode})`);
                         $('#delete-var-barcode').val(variant.barcode);
                         $('#deleteVarModal').modal('show');
+                        break;
+
+                    case $(clickedElement).hasClass('status'):
+                        displayVarActived(variant);
+                        break;
+
+                    case $(clickedElement).hasClass('time'):
+                        $('.current-var').text(`${variant.barcode}`);
+                        $('#timelineModal').modal('show');
                         break;
 
                     default:
@@ -336,20 +356,107 @@ $('#variants-list').on('click', '.edit, .delete, .status', function () {
     });
 });
 
+// Active/Unactive Variant
+function displayVarActived(variant) {
+    $('.current-var').text(`(${variant.barcode})`);
+    if (variant.actived) {
+        $('#unactive-status').show();
+        $('#active-status').hide();
+    } else {
+        $('#unactive-status').hide();
+        $('#active-status').show();
+    }
+    $('#actived-var-barcode').val(variant.barcode);
+    $('#activedValue').val(!variant.actived);
+    $('#toggleActiveModal').modal('show');
+}
+
+function changeVarActived() {
+    const data = {
+        selectedBarcode: $('#actived-var-barcode').val(),
+        actived: $('#activedValue').val() === 'false' ? false : true
+    };
+
+    $.ajax({
+        url: '/variant/update',
+        method: 'PUT',
+        dataType: 'json',
+        data: data,
+        success: function (response) {
+            if (response.success) {
+                $('#btn-ok-reload').show();
+                $('#btn-ok-noreload').hide();
+
+                $('#modal-success-title').text(response.title);
+                $('#modal-success-msg').text(response.message);
+                $('#successModal').modal('show');
+            }
+        },
+        error: function (xhr, status, error) {
+            let msg;
+            if (xhr.status === 400) {
+                const response = JSON.parse(xhr.responseText);
+                if (response.type === 0 && response.errors && response.errors.length > 0) {
+                    const inputError = response.errors;
+                    inputError.forEach(input => {
+                        $(`#${input.field}`).removeClass('is-valid').addClass('is-invalid');
+                        msg += input.msg + '<br>';
+                    })
+                } else {
+                    msg = response.message;
+                }
+            } else {
+                msg = error;
+            }
+            $('#message-modal-fail').html(msg);
+            $('#failModal').modal('show');
+        }
+    });
+}
+
+// Detail Variant
+function displayVarDetail(variant) {
+    const img = `/uploads/product_variants/${variant.img !== 'default.png' ? `${productId}/` : ''}${variant.img}`;
+    $('#detail-img-variant').attr('src', img);
+    $('#detail-barcode-variant').text(variant.barcode);
+    $('#detail-color-variant').text(variant.color);
+    $('#detail-cost-variant').text(variant.cost);
+    $('#detail-price-variant').text(variant.price);
+    $('#detail-quantity-variant').text(variant.quantity);
+    $('#detail-warn-variant').text(variant.warn);
+    $('#detail-status-variant').text(`${variant.actived ? 'actived' : 'unactived'}`).removeClass().addClass(`pt-2 badge badge-sm ${getBadgeClass(variant.actived, 'actived')}`);
+    $('#detail-created-variant').text(`${formatDateTime(variant.created.datetime)} by ${variant.created.name} (${variant.created.Id})`);
+
+    if (variant.updated.length > 0) {
+        variant.updated.sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
+        const latestUpdate = variant.updated[0];
+        $('#detail-updated-variant').text(`${formatDateTime(latestUpdate.datetime)} by ${latestUpdate.name} (${latestUpdate.Id})`);
+    } else {
+        $('#detail-updated-variant').text("Nothing");
+    }
+
+    $('#detailModal').modal('show');
+}
+
 // Edit Variant
 function displayVarEdit(variant) {
     $('#auto').prop('checked', false);
     $('#custom').prop('checked', true);
-    $('#varTittle').text(`Edit Product Variant ${variant.barcode}`);
+    $('#varTittle').text(`Edit Variant ${variant.barcode}`);
     $('#barcode').val(variant.barcode).prop('disabled', false);
     $('#color').val(variant.color);
     $('#quantity').val(variant.quantity);
     $('#warn').val(variant.warn);
     $('#cost').val(variant.cost);
     $('#price').val(variant.price);
-    $('#preview').attr('src', `/uploads/product_variants/${variant.img !== 'default.png' ? `${productId}/` : ''}${variant.img}`);
+    const img = `/uploads/product_variants/${variant.img !== 'default.png' ? `${productId}/` : ''}${variant.img}`;
+    $('#preview').attr('src', img);
     $('#addBtn').hide();
     $('#editBtn').show();
+    $('#removeImg').click(() => {
+        $('#preview').attr('src', img);
+        $('#img').val('');
+    });
     $('#varModal').modal('show');
 }
 
@@ -377,7 +484,7 @@ function editVariant() {
             success: function (response) {
                 if (response.success) {
                     $('#modal-success-title').text(response.title);
-                    localStorage.setItem('updated', response.message);
+                    localStorage.setItem('updated', JSON.stringify({ success: true, message: response.message }));
                 }
             },
             error: function (xhr, status, error) {
@@ -396,11 +503,20 @@ function editVariant() {
                 } else {
                     msg = error;
                 }
-                localStorage.setItem('updated', msg);
+                localStorage.setItem('updated', JSON.stringify({ success: false, message: msg }));
             },
             complete: function () {
                 if ($('#img')[0].files.length > 0) {
                     uploadImg(selectedBarcode, productId);
+                } else {
+                    const updated = JSON.parse(localStorage.getItem('updated'));
+                    if (updated.success) {
+                        $('#modal-success-msg').text(updated.message);
+                        $('#successModal').modal('show');
+                    } else {
+                        $('#message-modal-fail').html(updated.message);
+                        $('#failModal').modal('show');
+                    }
                 }
             }
         });
@@ -454,7 +570,7 @@ function confirmDel() {
 }
 
 // Utils
-function uploadImage(barcode, productId) {
+function uploadImg(barcode, productId) {
     const formData = new FormData();
     formData.append('productId', productId);
     formData.append('barcode', barcode);
@@ -471,7 +587,7 @@ function uploadImage(barcode, productId) {
                 if (response.success) {
                     const selectedBarcode = localStorage.getItem('selectedBarcode');
                     if (selectedBarcode) {
-                        return;
+                        $('#modal-success-msg').text('Variant updated & Image uploaded successfully.');
                     } else {
                         $('#modal-success-msg').text('Variant created & Image uploaded successfully.');
                     }
@@ -565,17 +681,27 @@ function removeEmptyProperties(obj) {
     }
 }
 
-function getStatusBadgeClass(status) {
-    switch (status) {
-        case 'new':
-            return 'badge-primary';
-        case 'in stock':
-            return 'badge-success';
-        case 'warning':
-            return 'badge-warning';
-        case 'out of stock':
-            return 'badge-danger';
+function getBadgeClass(value, condition) {
+    switch (condition) {
+        case 'actived':
+            return value ? 'bg-gradient-success' : 'bg-gradient-secondary';
+        case 'status':
+            return value === 'new' ? 'badge-primary' : (value === 'in stock' ? 'badge-success' : (value === 'warning' ? 'badge-warning' : (value === 'out of stock' ? 'badge-danger' : 'badge-secondary')));
         default:
             return 'badge-secondary';
     }
+}
+
+function formatDateTime(dateString) {
+    const options = { day: 'numeric', month: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true };
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB', options);
+}
+
+function formatCurrency(input) {
+    if (isNaN(input)) {
+        return "Invalid input";
+    }
+    const formattedCurrency = (input * 1000).toLocaleString('en-US');
+    return formattedCurrency + " VND";
 }

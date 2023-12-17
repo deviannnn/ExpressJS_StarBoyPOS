@@ -21417,6 +21417,23 @@ tbody img {
     flex: 0 0 auto;
     width: 20%;
 }
+
+.col-2-7 {
+    flex: 0 0 auto;
+    width: 22%;
+    padding: 0;
+}
+
+.col-9-3 {
+    flex: 0 0 auto;
+    width: 78%;
+    padding: 0;
+}
+
+.col-9-5 {
+    flex: 0 0 auto;
+    width: 80%;
+}
 /* custom */
 
 .focused {
