@@ -52,7 +52,7 @@ const getByID = async (req, res) => {
 
         await product.populate('category');
         const variants = await product.getVariants();
-        
+
         product = { ...product._doc, variants };
 
         return res.status(200).json({ success: true, product: product });

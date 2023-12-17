@@ -88,6 +88,7 @@ function displayCategoryDetail(category) {
 // Delete
 function confirmDel() {
     const categoryId = $('#delete-category-id').val();
+    const listItem = $(`[data-id="${categoryId}"]`).closest('tr');
 
     $.ajax({
         url: '/category/remove',
@@ -96,6 +97,10 @@ function confirmDel() {
         data: { categoryId },
         success: function (response) {
             if (response.success) {
+                listItem.remove();
+                $('#btn-ok-reload').hide();
+                $('#btn-ok-noreload').show();
+                
                 $('#modal-success-title').text(response.title);
                 $('#modal-success-msg').text(response.message);
                 $('#successModal').modal('show');

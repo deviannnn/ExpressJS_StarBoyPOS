@@ -1,7 +1,6 @@
-$(document).ready(function () {
-    const urlParams = new URLSearchParams(window.location.search);
-    const productId = urlParams.get('id');
+const productId = new URLSearchParams(window.location.search).get('id');
 
+$(document).ready(function () {
     $.ajax({
         url: '/category/getAll',
         method: 'POST',
@@ -78,7 +77,7 @@ function fillCategory(data) {
 }
 
 function fillSpecs(categorySpecs, productSpecs) {
-    const dropdown = $('#specs-area');
+    const dropdown = $('#specs-list');
     dropdown.empty();
 
     categorySpecs.forEach((categorySpec, index) => {
@@ -114,52 +113,48 @@ function displayVariants(variants) {
         variants.forEach(variant => {
             const variantItem = `
                 <li class="list-group-item border-0 d-flex p-4 mb-2 bg-gray-100 border-radius-lg">
-                    <div class="row w-80">
-                        <div class="col-5 col-lg-2">
-                            <img class="h-lg-100 w-100" src="/uploads/product_variants/${variant.img}">
+                    <div class="row w-100">
+                        <div class="col-3 d-flex flex-column align-items-center">
+                            <span class="badge ${getStatusBadgeClass(variant.status)} badge-sm mb-2">${variant.status}</span>
+                            <img class="product-img text-center" src="/uploads/product_variants/${variant.img !== 'default.png' ? `${productId}/` : ''}${variant.img}">
                         </div>
-                        <div class="col-7 col-lg-10 d-flex flex-column">
-                            <h6 class="mb-3 text-sm">${variant.barcode}</h6>
+                        <div class="col-12 col-sm-9 d-flex flex-column">
+                            <h6 class="mt-3 mt-sm-0 mb-3 text-sm">${variant.barcode}</h6>
                             <div class="row">
-                                <span class="col-lg-6 mb-2 text-xs">Color:
+                                <span class="col-6 mb-2 text-xs">Color:
                                     <span class="text-dark font-weight-bold ms-sm-2">${variant.color}</span>
                                 </span>
-                                <span class="col-lg-6 mb-2 text-xs">Quantity:&nbsp;
+                                <span class="col-6 mb-2 text-xs">Quantity:
                                     <span class="text-dark font-weight-bold ms-sm-2">${variant.quantity}</span>
                                 </span>
-                                <span class="col-lg-6 mb-2 text-xs">Cost:&nbsp;
+                                <span class="col-6 mb-2 text-xs">Cost:&nbsp;
                                     <span class="text-dark font-weight-bold ms-sm-2">${variant.cost} VND</span>
                                 </span>
-                                <span class="col-lg-6 mb-2 text-xs">Warn:&nbsp;&nbsp;&nbsp;&nbsp;
+                                <span class="col-6 mb-2 text-xs">Warn:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                     <span class="text-dark font-weight-bold ms-sm-2">${variant.warn}</span>
                                 </span>
-                                <span class="col-lg-6 mb-2 text-xs">Price:
+                                <span class="col-6 mb-2 text-xs">Price:
                                     <span class="text-dark font-weight-bold ms-sm-2">${variant.price} VND</span>
                                 </span>
-                                <span class="col-lg-6 mb-2 text-xs">Actived:&nbsp;
-                                    <span class="text-dark font-weight-bold ms-sm-2">${variant.actived}</span>
+                                <span class="col-6 mb-2 text-xs">Status:&nbsp;
+                                    <span data-barcode=${variant.barcode} class="btn status badge badge-sm bg-gradient-${variant.actived === true ? 'success' : 'secondary'}">${variant.actived === true ? 'actived' : 'unactived'}</span>
                                 </span>
                             </div>
                         </div>
                     </div>
-                    <div class="ms-auto text-end">
-                        <a class="edit btn btn-link text-dark px-3 mb-0" data-barcode=${variant.barcode}>
+                    <div class="row ms-auto text-end w-sm-35 w-20" style="height: fit-content">
+                        <a class="col-lg-6 edit btn btn-link m-0 ps-0 text-dark" data-barcode=${variant.barcode}>
                             <i class="fas fa-pencil-alt text-dark me-2" aria-hidden="true"></i>
                             Edit
                         </a>
-                        <a class="btn btn-link text-primary text-gradient px-3 mb-0" data-barcode=${variant.barcode}>
-                            <i class="fas fa-truck-moving text-primary me-2" aria-hidden="true"></i>
-                            Imp
-                        </a>
-                    </div>
-                    <div class="ms-auto text-end">
-                        <a class="delete btn btn-link text-danger text-gradient px-3 mb-0" data-barcode=${variant.barcode}>
+                        <a class="col-lg-6 delete btn btn-link m-0 ps-0 text-danger text-gradient" data-barcode=${variant.barcode}>
                             <i class="far fa-trash-alt me-2" aria-hidden="true"></i>
                             Delete
                         </a>
-                        <a class="status btn btn-link text-${variant.actived ? 'secondary' : 'success'} px-3 mb-0" data-barcode=${variant.barcode}>
-                            <i class="fas fa-ban text-${variant.actived ? 'secondary' : 'success'} me-2" aria-hidden="true"></i>
-                            ${variant.actived ? 'Unact' : 'Active'}
+                        <span class="col-lg-6"></span>
+                        <a class="col-lg-6 btn btn-link m-0 ps-0 text-primary text-gradient" data-barcode=${variant.barcode}>
+                            <i class="fas fa-eye text-primary me-2" aria-hidden="true"></i>
+                            Detail
                         </a>
                     </div>
                 </li>`;
@@ -178,11 +173,10 @@ function displayVariants(variants) {
 
 // Edit Product
 function updateProduct() {
-    const productId = new URLSearchParams(window.location.search).get('id');
     const categoryId = $('#category').val();
     const name = $('#name').val();
     const specs = [];
-    $('#specs-area .specs').each(function () {
+    $('#specs-list .specs').each(function () {
         const specName = $(this).find('label').text().trim();
         const specOption = $(this).find('select').val();
 
@@ -202,6 +196,9 @@ function updateProduct() {
         data: JSON.stringify({ productId, categoryId, name, specs }),
         success: function (response) {
             if (response.success) {
+                $('#btn-ok-reload').hide();
+                $('#btn-ok-noreload').show();
+
                 $('#modal-success-title').text(response.title);
                 $('#modal-success-msg').text(response.message);
                 $('#successModal').modal('show');
@@ -230,48 +227,45 @@ function updateProduct() {
 }
 
 // Add Variant
-function chooseImg() {
-    $('#img').click();
+function displayVarAdd() {
+    $('#varTittle').text("New Product Variant");
+    $('#auto').prop('checked', true);
+    $('#custom').prop('checked', false);
+    $('#barcode').prop('disabled', true);
+    $('#addBtn').show();
+    $('#editBtn').hide();
+    autoBarcode();
+    $('#varModal').modal('show');
 }
 
-$('#img').on('change', function () {
-    const fileInput = $(this)[0];
-    if (fileInput.files && fileInput.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            $('#preview').attr('src', e.target.result);
-        };
-        reader.readAsDataURL(fileInput.files[0]);
-    }
-});
-
 function addVariant() {
-    const productId = new URLSearchParams(window.location.search).get('id');
+    const barcode = $('#barcode').val();
+    const color = $('#color').val();
+    const quantity = $('#quantity').val();
+    const warn = $('#warn').val();
+    const cost = $('#cost').val();
+    const price = $('#price').val();
 
-    let formData = new FormData();
-    formData.append('productId', productId);
-    formData.append('barcode', $('#barcode').val());
-    formData.append('color', $('#color').val());
-    formData.append('warn', $('#warn').val());
-    formData.append('cost', $('#cost').val());
-    formData.append('price', $('#price').val());
+    const data = { productId, barcode, color, warn, cost, price, quantity };
+    removeEmptyProperties(data);
 
-    let imageFile = $('#img')[0].files[0];
-    if (imageFile) {
-        formData.append('img', imageFile);
-    }
-    console.log(formData);
+    $('#btn-ok-reload').show();
+    $('#btn-ok-noreload').hide();
+
     $.ajax({
         url: '/variant/create',
         method: 'POST',
-        contentType: 'application/x-www-form-urlencoded',
-        data: formData,
-        processData: false,
+        dataType: 'json',
+        data: data,
         success: function (response) {
             if (response.success) {
-                $('#modal-created-title').text(response.title);
-                $('#modal-created-msg').text(response.message);
-                $('#createdModal').modal('show');
+                $('#modal-success-title').text(response.title);
+                if ($('#img')[0].files.length > 0) {
+                    uploadImage(response.variant.barcode, productId);
+                } else {
+                    $('#modal-success-msg').html('Variant created successfully with <b class="text-warning text-gradient">Default image</b>.');
+                    $('#successModal').modal('show');
+                }
             }
         },
         error: function (xhr, status, error) {
@@ -294,4 +288,294 @@ function addVariant() {
             $('#failModal').modal('show');
         }
     });
+}
+
+// Handler
+$('#variants-list').on('click', '.edit, .delete, .status', function () {
+    const barcode = $(this).data("barcode");
+
+    const clickedElement = this;
+
+    $.ajax({
+        url: '/variant/getByBarcode',
+        method: 'POST',
+        dataType: 'json',
+        data: { barcode },
+        success: function (response) {
+            if (response.success) {
+                const variant = response.variant;
+
+                switch (true) {
+                    case $(clickedElement).hasClass('edit'):
+                        localStorage.setItem('selectedBarcode', variant.barcode);
+                        displayVarEdit(variant);
+                        break;
+
+                    case $(clickedElement).hasClass('delete'):
+                        $('.current-var').text(`(${variant.barcode})`);
+                        $('#delete-var-barcode').val(variant.barcode);
+                        $('#deleteVarModal').modal('show');
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+        },
+        error: function (xhr, status, error) {
+            let msg = '';
+            if (xhr.status === 400) {
+                const response = JSON.parse(xhr.responseText);
+                msg = response.message;
+            } else {
+                msg = error;
+            }
+            $('#message-modal-fail').text(msg);
+            $('#failModal').modal('show');
+        }
+    });
+});
+
+// Edit Variant
+function displayVarEdit(variant) {
+    $('#auto').prop('checked', false);
+    $('#custom').prop('checked', true);
+    $('#varTittle').text(`Edit Product Variant ${variant.barcode}`);
+    $('#barcode').val(variant.barcode).prop('disabled', false);
+    $('#color').val(variant.color);
+    $('#quantity').val(variant.quantity);
+    $('#warn').val(variant.warn);
+    $('#cost').val(variant.cost);
+    $('#price').val(variant.price);
+    $('#preview').attr('src', `/uploads/product_variants/${variant.img !== 'default.png' ? `${productId}/` : ''}${variant.img}`);
+    $('#addBtn').hide();
+    $('#editBtn').show();
+    $('#varModal').modal('show');
+}
+
+function editVariant() {
+    const selectedBarcode = localStorage.getItem('selectedBarcode');
+    if (selectedBarcode) {
+        const barcode = $('#barcode').val();
+        const color = $('#color').val();
+        const quantity = $('#quantity').val();
+        const warn = $('#warn').val();
+        const cost = $('#cost').val();
+        const price = $('#price').val();
+
+        const data = { selectedBarcode, barcode, color, warn, cost, price, quantity };
+        removeEmptyProperties(data);
+
+        $('#btn-ok-reload').show();
+        $('#btn-ok-noreload').hide();
+
+        $.ajax({
+            url: '/variant/update',
+            method: 'PUT',
+            dataType: 'json',
+            data: data,
+            success: function (response) {
+                if (response.success) {
+                    $('#modal-success-title').text(response.title);
+                    localStorage.setItem('updated', response.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                let msg = '';
+                if (xhr.status === 400) {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.type === 0 && response.errors && response.errors.length > 0) {
+                        const inputError = response.errors;
+                        inputError.forEach(input => {
+                            $(`#${input.field}`).removeClass('is-valid').addClass('is-invalid');
+                            msg += input.msg + '<br>';
+                        })
+                    } else {
+                        msg = response.message;
+                    }
+                } else {
+                    msg = error;
+                }
+                localStorage.setItem('updated', msg);
+            },
+            complete: function () {
+                if ($('#img')[0].files.length > 0) {
+                    uploadImg(selectedBarcode, productId);
+                }
+            }
+        });
+    } else {
+        $('#message-modal-fail').html('No variation is selected. Please try again.');
+        $('#failModal').modal('show');
+    }
+}
+
+// Delete Variant
+function confirmDel() {
+    const barcode = $('#delete-var-barcode').val();
+    const listItem = $(`[data-barcode="${barcode}"]`).closest('li');
+
+    $.ajax({
+        url: '/variant/remove',
+        method: 'DELETE',
+        dataType: 'json',
+        data: { barcode },
+        success: function (response) {
+            if (response.success) {
+                listItem.remove();
+                $('#btn-ok-reload').hide();
+                $('#btn-ok-noreload').show();
+
+                $('#modal-success-title').text(response.title);
+                $('#modal-success-msg').text(response.message);
+                $('#successModal').modal('show');
+            }
+        },
+        error: function (xhr, status, error) {
+            let msg;
+            if (xhr.status === 400) {
+                const response = JSON.parse(xhr.responseText);
+                if (response.type === 0 && response.errors && response.errors.length > 0) {
+                    const inputError = response.errors;
+                    inputError.forEach(input => {
+                        $(`#${input.field}`).removeClass('is-valid').addClass('is-invalid');
+                        msg += input.msg + '<br>';
+                    })
+                } else {
+                    msg = response.message;
+                }
+            } else {
+                msg = error;
+            }
+            $('#message-modal-fail').html(msg);
+            $('#failModal').modal('show');
+        }
+    });
+}
+
+// Utils
+function uploadImage(barcode, productId) {
+    const formData = new FormData();
+    formData.append('productId', productId);
+    formData.append('barcode', barcode);
+    formData.append('img', $('#img')[0].files[0]);
+
+    if ($('#img')[0].files.length > 0) {
+        $.ajax({
+            url: '/variant/uploadImg',
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response.success) {
+                    const selectedBarcode = localStorage.getItem('selectedBarcode');
+                    if (selectedBarcode) {
+                        return;
+                    } else {
+                        $('#modal-success-msg').text('Variant created & Image uploaded successfully.');
+                    }
+                    $('#successModal').modal('show');
+                }
+            },
+            error: function (error) {
+                const selectedBarcode = localStorage.getItem('selectedBarcode');
+                if (selectedBarcode) {
+                    $('#modal-success-msg').html('Variant updated successfully but <b class="text-danger text-gradient">Image upload fail</b>.');
+                } else {
+                    $('#modal-success-msg').html('Variant created successfully but <b class="text-danger text-gradient">Image upload fail</b>.');
+                }
+                $('#successModal').modal('show');
+            }
+        });
+    } else {
+        $('#message-modal-fail').html('No image is selected. Please try again.');
+        $('#failModal').modal('show');
+    }
+}
+
+$('#varModal').on('hidden.bs.modal', function () {
+    $('#auto').prop('checked', true);
+    $('#custom').prop('checked', false);
+    $('#barcode').prop('disabled', true).removeClass('is-invalid');
+    $('#color').val('').removeClass('is-invalid');
+    $('#quantity').removeClass('is-invalid');
+    $('#warn').val('').removeClass('is-invalid');
+    $('#cost').val('').removeClass('is-invalid');
+    $('#price').val('').removeClass('is-invalid');
+    $('#preview').attr('src', "/uploads/product_variants/default.png");
+    $('#img').val('');
+    localStorage.removeItem('selectedBarcode');
+});
+
+$('input[name="typeBarcode"]').change(function () {
+    if ($('#auto').is(':checked')) {
+        $('#barcode').prop('disabled', true);
+        autoBarcode();
+    } else if ($('#custom').is(':checked')) {
+        $('#barcode').prop('disabled', false);
+        const selectedBarcode = localStorage.getItem('selectedBarcode');
+        if (selectedBarcode) {
+            $('#barcode').val(selectedBarcode);
+        }
+    }
+});
+
+function autoBarcode() {
+    let barcode = '';
+    barcode += $('#category option:selected').text().substring(0, 1);
+    const partsName = $('#name').val().split(' ') || '';
+    partsName.forEach(part => {
+        barcode += part.substring(0, 2);
+    })
+    barcode += $('#color').val().substring(0, 3) || '';
+    $('#barcode').val(barcode.toUpperCase());
+}
+
+function chooseImg() {
+    $('#img').click();
+}
+
+$('#color').on('input', function () {
+    if ($('#auto').is(':checked')) {
+        autoBarcode();
+    }
+});
+
+$('#img').on('change', function () {
+    const fileInput = $(this)[0];
+    if (fileInput.files && fileInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            $('#preview').attr('src', e.target.result);
+        };
+        reader.readAsDataURL(fileInput.files[0]);
+    }
+});
+
+$('#barcode, #color, #quantity, #warn, #cost, #price').on('focus', function () {
+    $(this).removeClass('is-invalid');
+});
+
+function removeEmptyProperties(obj) {
+    for (const key in obj) {
+        if (obj[key] === '' || obj[key] === undefined) {
+            delete obj[key];
+        }
+    }
+}
+
+function getStatusBadgeClass(status) {
+    switch (status) {
+        case 'new':
+            return 'badge-primary';
+        case 'in stock':
+            return 'badge-success';
+        case 'warning':
+            return 'badge-warning';
+        case 'out of stock':
+            return 'badge-danger';
+        default:
+            return 'badge-secondary';
+    }
 }

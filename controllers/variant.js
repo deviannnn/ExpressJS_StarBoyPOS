@@ -2,16 +2,17 @@ const mongoose = require('mongoose');
 const Variant = require('../models/variant');
 
 const create = async (req, res) => {
-    const { productId, barcode, color, cost, price, warn } = req.body;
+    const { productId, barcode, color, quantity, warn, cost, price } = req.body;
 
     try {
         const newVariant = new Variant({
             product: new mongoose.Types.ObjectId(productId),
-            img: req.file ? req.file.filename : 'default.png',
+            img: 'default.png',
             barcode: barcode,
             color: color,
             cost: cost,
             price: price,
+            quantity: quantity !== undefined ? quantity : 0,
             warn: warn,
             created: {
                 Id: req.user.Id,
@@ -76,27 +77,32 @@ const getByBarcode = async (req, res) => {
 }
 
 const update = async (req, res) => {
-    const { barcode, newbarcode, color, cost, price, warn, actived } = req.body;
+    const { selectedBarcode, barcode, quantity, color, warn, cost, price, actived } = req.body;
 
     try {
-        const updatedVariant = await Variant.findOne({ barcode });
+        const updatedVariant = await Variant.findOne({ barcode: selectedBarcode });
 
-        const updateFields = { color, cost, price, warn, actived };
+        const updateFields = { color, warn, cost, price, actived };
 
         let diff = false;
 
         for (const [key, value] of Object.entries(updateFields)) {
-            if (value !== undefined && value !== updatedVariant[key]) {
+            if (value !== undefined && value.toString() !== updatedVariant[key].toString()) {
                 updatedVariant[key] = value;
                 diff = true;
             }
         }
-        if (newbarcode !== undefined && newbarcode !== updatedVariant.barcode) {
-            updatedVariant.barcode = newbarcode,
-                diff = true;
+        if (barcode !== undefined && barcode !== updatedVariant.barcode) {
+            updatedVariant.barcode = barcode;
+            diff = true;
         }
-        if (req.file !== undefined) {
-            updatedVariant.img = req.file.filename;
+        if (quantity !== undefined && quantity.toString() !== updatedVariant.quantity.toString()) {
+            updatedVariant.timeline.push({
+                quantity: quantity - updatedVariant.quantity,
+                action: 'editing',
+                datetime: Date.now()
+            })
+            updatedVariant.quantity = quantity;
             diff = true;
         }
 
@@ -107,14 +113,13 @@ const update = async (req, res) => {
         updatedVariant.updated.push({
             Id: req.user.Id,
             name: req.user.name,
-            datetime: Date.now(),
+            datetime: Date.now()
         });
 
         await updatedVariant.save();
 
         return res.status(200).json({ success: true, title: 'Updated!', message: 'Variant updated successfully.', variant: updatedVariant });
     } catch (error) {
-        console.log(error.message);
         return res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
 };
@@ -135,4 +140,25 @@ const remove = async (req, res) => {
     }
 };
 
-module.exports = { getAllByProductID, getByBarcode, create, update, remove };
+const uploadImg = async (req, res) => {
+    const { barcode } = req.body;
+    try {
+        const uploadVariant = await Variant.findOne({ barcode });
+        if (!uploadVariant) {
+            return res.status(404).json({ success: false, message: 'Variant not found.' });
+        }
+
+        if (req.file !== undefined) {
+            uploadVariant.img = req.file.filename;
+            await uploadVariant.save();
+
+            return res.status(200).json({ success: true, title: 'Uploaded!', message: 'Image uploaded successfully.', variant: uploadVariant });
+        } else {
+            return res.status(400).json({ success: false, message: 'No image to upload.' });
+        }
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+}
+
+module.exports = { getAllByProductID, getByBarcode, create, update, remove, uploadImg };

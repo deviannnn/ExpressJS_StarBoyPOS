@@ -38,7 +38,7 @@ function fillCategory(data) {
 }
 
 function fillSpecs(categorySpecs) {
-    const dropdown = $('#specs-area');
+    const dropdown = $('#specs-list');
     dropdown.empty();
 
     categorySpecs.forEach((categorySpec, index) => {
@@ -80,7 +80,7 @@ function createProduct() {
     const categoryId = $('#category').val();
     const name = $('#name').val();
     const specs = [];
-    $('#specs-area .specs').each(function () {
+    $('#specs-list .specs').each(function () {
         const specName = $(this).find('label').text().trim();
         const specOption = $(this).find('select').val();
 
@@ -99,6 +99,9 @@ function createProduct() {
         contentType: 'application/json',
         data: JSON.stringify({ categoryId, name, specs }),
         success: function (response) {
+            $('#btn-ok-reload').show();
+            $('#btn-ok-noreload').hide();
+            
             $('#modal-success-title').text(response.title);
             $('#modal-success-msg').text(response.message);
             $('#successModal').modal('show');

@@ -27,6 +27,8 @@ function createCategory() {
         dataType: 'json',
         data: { name },
         success: function (response) {
+            $('#btn-ok-reload').hide();
+            $('#btn-ok-noreload').show();
             $('#modal-success-title').text(response.title);
             $('#modal-success-msg').text(response.message);
             $('#successModal').modal('show');

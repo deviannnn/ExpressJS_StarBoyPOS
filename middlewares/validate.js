@@ -279,41 +279,34 @@ const checkVariant = [
         .not().isEmpty().withMessage('Price cannot be empty.')
         .isNumeric().withMessage('Price must be a number.'),
 
+    check('quantity')
+        .optional()
+        .not().isEmpty().withMessage('Quantity cannot be empty.')
+        .isNumeric().withMessage('Quantity must be a number.'),
+
     check('warn')
         .not().isEmpty().withMessage('Warn cannot be empty.')
         .isNumeric().withMessage('Warn must be a number.')
 ];
 
 const checkUVariant = [
-    check('barcode')
-        .not().isEmpty().withMessage('Barcode cannot be empty.')
+    check('selectedBarcode')
+        .not().isEmpty().withMessage('No variation is selected. Please try again.')
         .custom(async (value, { req }) => {
             if (value) {
                 const existingVariant = await Variant.findOne({ barcode: value });
                 if (!existingVariant) {
-                    throw new Error(`Variant not found with current barcode is ${value}.`);
+                    throw new Error(`Variant not found with selected barcode is ${value}.`);
                 }
             }
             return true
         }),
 
-    check('productId')
-        .not().isEmpty().withMessage('You have to provide product value of this variant.')
-        .custom(async (value, { req }) => {
-            if (value) {
-                const existingVariant = await Variant.findOne({ barcode: req.body.barcode });
-                if (existingVariant.product.toString() !== value) {
-                    throw new Error('this variant do not belong to this product.');
-                }
-            }
-            return true
-        }),
-
-    check('newbarcode')
+    check('barcode')
         .optional()
         .not().isEmpty().withMessage('New barcode cannot be empty.')
         .custom(async (value, { req }) => {
-            if (value === req.body.barcode) return true;
+            if (value === req.body.selectedBarcode) return true;
             if (value) {
                 const existingVariant = await Variant.findOne({ barcode: value });
                 if (existingVariant) {
@@ -337,6 +330,11 @@ const checkUVariant = [
         .not().isEmpty().withMessage('Price cannot be empty.')
         .isNumeric().withMessage('Price must be a number.'),
 
+    check('quantity')
+        .optional()
+        .not().isEmpty().withMessage('Quantity cannot be empty.')
+        .isNumeric().withMessage('Quantity must be a number.'),
+        
     check('warn')
         .optional()
         .not().isEmpty().withMessage('Warn cannot be empty.')

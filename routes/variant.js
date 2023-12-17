@@ -18,9 +18,11 @@ const setRootFolder = (req, res, next) => {
     next();
 }
 
-router.post('/create', [checkVariant, validate], setRootFolder, upload.single('img'), variantController.create);
+router.post('/uploadImg', setRootFolder, upload.single('img'), variantController.uploadImg);
 
-router.put('/update', [checkUVariant, validate], setRootFolder, upload.single('img'), variantController.update);
+router.post('/create', [checkVariant, validate], variantController.create);
+
+router.put('/update', [checkUVariant, validate], variantController.update);
 
 router.delete('/remove', variantController.remove);
 

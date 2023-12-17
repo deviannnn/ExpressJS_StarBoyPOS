@@ -62,7 +62,7 @@
                         </div>
                     </div>
                 </div>
-                <div id="specs-area" class="row"></div>
+                <div id="specs-list" class="row"></div>
             </div>
         </div>
     </div>
@@ -79,7 +79,7 @@
                     </div>
                     <div class="col-6 ms-auto my-auto mt-lg-0 mt-4 text-end">
                         <a href="" class="btn bg-gradient-warning btn-sm mb-0" data-bs-toggle="modal"
-                            data-bs-target="#addVarModal">+&nbsp;Variant</a>
+                            onclick="displayVarAdd()">+&nbsp;Variant</a>
                     </div>
                 </div>
             </div>
@@ -91,11 +91,11 @@
 </div>
 
 <!-- Modal Add Var -->
-<div class="modal fade" id="addVarModal" tabindex="-1" role="dialog" style="--bs-modal-width: 850px;">
+<div class="modal fade" id="varModal" tabindex="-1" role="dialog" style="--bs-modal-width: 900px;">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title text-bolder">New Product Variant</h5>
+                <h5 id="varTittle" class="modal-title text-bolder">New Product Variant</h5>
                 <button type="button" class="btn-close text-dark" data-bs-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">×</span>
                 </button>
@@ -104,8 +104,8 @@
                 <div class="row">
                     <div class="col-lg-4 text-center">
                         <h6>Variant Image</h6>
-                        <img id="preview" class="w-80" alt="product_image" src="/assets/img/iphone15-pro.png"
-                            style="height: 163px;">
+                        <img id="preview" class="w-80" alt="product_image" src="/uploads/product_variants/default.png"
+                            style="height: 170px;">
                         <input class="form-control" type="file" id="img" accept=".png, .jpg" hidden>
                         <div class="d-flex ms-4 mt-4">
                             <button class="btn bg-gradient-primary btn-sm mb-0 me-2" type="button"
@@ -117,29 +117,45 @@
                     <div class="col-lg-8 mt-lg-0 mt-4">
                         <h6 class="text-center">Variant Information</h6>
                         <div class="row">
-                            <div class="col-12 mt-0">
-                                <label for="barcode">Barcode (auto or custom)</label>
-                                <input class="form-control" type="text" id="barcode" maxlength="20">
+                            <div class="col-lg-6">
+                                <div class="d-flex">
+                                    <label class="align-self-center me-3" for="barcode">Barcode</label>
+                                    <div class="form-check me-3">
+                                        <input class="form-check-input" type="radio" name="typeBarcode" id="auto"
+                                            checked>
+                                        <label class="ms-0" for="auto">auto</label>
+                                    </div>
+                                    <div class="form-check me-3">
+                                        <input class="form-check-input" type="radio" name="typeBarcode" id="custom">
+                                        <label class="ms-0" for="custom">custom</label>
+                                    </div>
+                                </div>
+                                <input class="form-control" type="text" id="barcode" maxlength="20" disabled>
                             </div>
-                            <div class="col-lg-6 mt-2">
-                                <label for="title">Color</label>
-                                <input class="form-control" type="text" id="title" placeholder="eg. Black, White,..."
+                            <div class="col-lg-6 mt-lg-0 mt-2">
+                                <label for="color">Color</label>
+                                <input class="form-control" type="text" id="color" placeholder="eg. Black, White,..."
                                     maxlength="15">
                             </div>
                             <div class="col-lg-6 mt-2">
-                                <label for="author">Warn</label>
-                                <input class="form-control" type="text" id="author" placeholder="eg. 3, 4, 5,..."
+                                <label for="quantity">Quantity</label>
+                                <input class="form-control" type="text" id="quantity" placeholder="Default 0"
+                                    maxlength="15">
+                            </div>
+                            <div class="col-lg-6 mt-2">
+                                <label for="warn">Warning quantity</label>
+                                <input class="form-control" type="text" id="warn" placeholder="eg. 3, 4, 5,..."
                                     maxlength="2">
                             </div>
                             <div class="col-lg-6 mt-2">
-                                <label for="price">Cost</label>
+                                <label for="cost">Cost</label>
                                 <div class="d-flex">
                                     <span class="input-group-text"
                                         style="border-top-right-radius: 0; border-bottom-right-radius: 0">VND</span>
-                                    <input class="form-control" type="text" id="price" placeholder="eg. 10 ≡ 10000 VND"
+                                    <input class="form-control" type="text" id="cost" placeholder="eg. 10 ≡ 10000 VND"
                                         style="border-radius: 0; border-right: 0; border-left: 0; z-index: 1; text-align: end">
                                     <span class="input-group-text"
-                                        style="border-top-left-radius: 0; border-bottom-left-radius: 0">.000</span>
+                                        style="border-top-left-radius: 0; border-bottom-left-radius: 0">000</span>
                                 </div>
                             </div>
                             <div class="col-lg-6 mt-2">
@@ -150,7 +166,7 @@
                                     <input class="form-control" type="text" id="price" placeholder="eg. 10 ≡ 10000 VND"
                                         style="border-radius: 0; border-right: 0; border-left: 0; z-index: 1; text-align: end">
                                     <span class="input-group-text"
-                                        style="border-top-left-radius: 0; border-bottom-left-radius: 0">.000</span>
+                                        style="border-top-left-radius: 0; border-bottom-left-radius: 0">000</span>
                                 </div>
                             </div>
                         </div>
@@ -159,7 +175,35 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn bg-gradient-dark" onclick="addVariant()">Next</button>
+                <button id="addBtn" type="button" class="btn bg-gradient-dark" onclick="addVariant()">Next</button>
+                <button id="editBtn" type="button" class="btn bg-gradient-dark" onclick="editVariant()"
+                    style="display: none">Update</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Delete Var -->
+<div class="modal fade" id="deleteVarModal" tabindex="-1" role="dialog" aria-labelledby="delete-modal"
+    aria-hidden="true">
+    <div class="modal-dialog modal-danger modal-dialog-centered modal-" role="document">
+        <div class="modal-content">
+            <div class="modal-body p-4">
+                <div class="text-center">
+                    <div class="swal2-icon swal2-warning swal2-icon-show" style="display: flex; margin-top: 15px;">
+                        <div class="swal2-icon-content">!</div>
+                    </div>
+                    <h3 class="font-weight-bolder opacity-9 mt-4">Are you sure?</h3>
+                    <p>You won't be able to revert this variant <span class="current-var text-bolder"></span>!
+                    </p>
+                </div>
+                <div class="d-flex justify-content-center mt-4">
+                    <input type="text" id="delete-var-barcode" hidden>
+                    <button type="button" class="btn btn bg-gradient-success mx-2" data-bs-dismiss="modal"
+                        onclick="confirmDel()">Yes, Delete it!</button>
+                    <button type="button" class="btn bg-gradient-danger mx-1" data-bs-dismiss="modal">No,
+                        Cancel</button>
+                </div>
             </div>
         </div>
     </div>

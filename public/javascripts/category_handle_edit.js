@@ -16,6 +16,10 @@ $('#name').on('blur', () => {
             name: newName
         },
         success: function (response) {
+            $('#btn-ok-reload').hide();
+            $('#btn-ok-noreload').show();
+            $('#name').prop('disabled', true);
+
             $('#modal-success-title').text(response.title);
             $('#modal-success-msg').text(response.message);
             $('#successModal').modal('show');
@@ -42,7 +46,7 @@ $('#name').on('blur', () => {
     });
 });
 
-$('#specs-area').on('click', '.edit, .delete', function () {
+$('#specs-list').on('click', '.edit, .delete', function () {
     const categoryId = $('#categoryId').val();
     const specId = $(this).data("id");
 
@@ -124,6 +128,9 @@ function addSpec() {
         data: { categoryId, name, options },
         success: function (response) {
             if (response.success) {
+                $('#btn-ok-reload').show();
+                $('#btn-ok-noreload').hide();
+
                 $('#modal-success-title').text(response.title);
                 $('#modal-success-msg').text(response.message);
                 $('#successModal').modal('show');
@@ -194,6 +201,9 @@ function editSpec() {
         data: { categoryId, specId, name, options },
         success: function (response) {
             if (response.success) {
+                $('#btn-ok-reload').show();
+                $('#btn-ok-noreload').hide();
+
                 $('#modal-success-title').text(response.title);
                 $('#modal-success-msg').text(response.message);
                 $('#successModal').modal('show');
@@ -225,6 +235,7 @@ function editSpec() {
 function confirmDel() {
     const categoryId = $('#categoryId').val();
     const specId = $('#delete-spec-id').val();
+    const listItem = $(`[data-id="${specId}"]`).closest('li');
 
     $.ajax({
         url: '/category/removeSpecs',
@@ -233,6 +244,10 @@ function confirmDel() {
         data: { categoryId, specId },
         success: function (response) {
             if (response.success) {
+                listItem.remove();
+                $('#btn-ok-reload').show();
+                $('#btn-ok-noreload').hide();
+
                 $('#modal-success-title').text(response.title);
                 $('#modal-success-msg').text(response.message);
                 $('#successModal').modal('show');

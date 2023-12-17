@@ -142,6 +142,9 @@ function onConfirmResendMailClick() {
         },
         success: function (response) {
             if (response.success) {
+                $('#btn-ok-reload').hide();
+                $('#btn-ok-noreload').show();
+
                 $('#modal-success-title').text(response.title);
                 $('#modal-success-msg').text(response.message);
                 $('#successModal').modal('show');
@@ -174,6 +177,8 @@ $('#confirm-del-btn').on('click', onConfirmDelButtonClick);
 
 function onConfirmDelButtonClick() {
     const deleteId = getValue('#deleteId');
+    const listItem = $(`[data-id="${deleteId}"]`).closest('tr');
+
     $.ajax({
         url: '/account/remove',
         method: 'DELETE',
@@ -181,6 +186,10 @@ function onConfirmDelButtonClick() {
         data: { Id: deleteId },
         success: function (response) {
             if (response.success) {
+                listItem.remove();
+                $('#btn-ok-reload').hide();
+                $('#btn-ok-noreload').show();
+
                 $('#modal-success-title').text(response.title);
                 $('#modal-success-msg').text(response.message);
                 $('#successModal').modal('show');
@@ -239,6 +248,9 @@ function onConfirmLockButtonClick() {
         data: data,
         success: function (response) {
             if (response.success) {
+                $('#btn-ok-reload').show();
+                $('#btn-ok-noreload').hide();
+
                 $('#modal-success-title').text(response.title);
                 $('#modal-success-msg').text(response.message);
                 $('#successModal').modal('show');
@@ -344,6 +356,9 @@ function onConfirmEditButtonClick() {
             data: data,
             success: function (response) {
                 if (response.success) {
+                    $('#btn-ok-reload').show();
+                    $('#btn-ok-noreload').hide();
+
                     $('#modal-success-title').text(response.title);
                     $('#modal-success-msg').text(response.message);
                     $('#successModal').modal('show');

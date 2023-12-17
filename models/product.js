@@ -23,7 +23,15 @@ const productSchema = new mongoose.Schema({
 
 productSchema.methods.getVariants = async function () {
     const productId = this._id;
-    return await Variant.find({ product: productId });
+    let variants = await Variant.find({ product: productId });
+
+    if (variants.length > 0) {
+        variants = variants.map(variant => {
+            return { ...variant.toObject(), status: variant.getStatus() };
+        });
+    }
+
+    return variants;
 };
 
 const Product = mongoose.model('Product', productSchema);
