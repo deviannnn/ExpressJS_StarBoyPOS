@@ -10,6 +10,8 @@ router.post('/getAllByProduct', variantController.getAllByProductID);
 
 router.post('/getByBarcode', variantController.getByBarcode);
 
+router.post('/search', variantController.search);
+
 router.use(isAdmin);
 
 const setRootFolder = (req, res, next) => {

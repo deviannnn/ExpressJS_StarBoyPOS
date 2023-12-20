@@ -51,7 +51,14 @@ const getByID = async (req, res) => {
         }
 
         await product.populate('category');
-        const variants = await product.getVariants();
+
+        let variants = await product.getVariants();
+        if (variants.length > 0 && req.user.role !== 'admin') {
+            variants = variants.map(variant => {
+                const { cost, ...variantWithoutCost } = variant;
+                return variantWithoutCost;
+            });
+        }
 
         product = { ...product._doc, variants };
 
@@ -129,7 +136,7 @@ const remove = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Product not found.' });
         }
 
-        return res.status(200).json({ success: true, title: 'Deleted!', product: deletedProduct });
+        return res.status(200).json({ success: true, title: 'Deleted!', message: 'Product deleted successfully.', product: deletedProduct });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
@@ -154,7 +161,7 @@ const renderProductList = async (req, res, next) => {
             }));
         }
 
-        res.render('product_list', { title: "Products", subTitle: 'Product List', products: products });
+        res.render('product_list', { title: "Products", subTitle: 'Product List', products: products, script: 'product_list' });
     } catch (error) {
         return next(error);
     }

@@ -4,7 +4,9 @@ const path = require('path');
 const bcrypt = require('bcrypt');
 const get = require('lodash/get');
 const set = require('lodash/set');
+
 const { generateJWT } = require('../utils/jwt');
+const { formatForBirthdayInput } = require('../utils/format');
 const { generateId } = require('../utils/auto-id');
 const { sendEmail } = require('../utils/send-mail');
 const { revokedTokens } = require('../middlewares/auth');
@@ -355,16 +357,6 @@ const renderProfile = async function (req, res, next) {
     } catch (error) {
         return next(error);
     }
-}
-
-function formatForBirthdayInput(birthdayStr) {
-    const birthdayDate = new Date(birthdayStr);
-
-    const year = birthdayDate.getFullYear();
-    const month = String(birthdayDate.getMonth() + 1).padStart(2, '0');
-    const day = String(birthdayDate.getDate()).padStart(2, '0');
-
-    return `${year}-${month}-${day}`;
 }
 
 module.exports = { register, login, logout, passwordReset, passwordChange, passwordUpdate, resendMail, getAll, getByID, update, remove, renderProfile };

@@ -1646,6 +1646,11 @@ progress {
         width: 16.666667%
     }
 
+    .col-lg-2-5 {
+        flex: 0 0 auto;
+        width: 20%;
+    }
+
     .col-lg-3 {
         flex: 0 0 auto;
         width: 25%
@@ -5885,7 +5890,8 @@ fieldset:disabled .btn {
 .list-group-item-action {
     width: 100%;
     color: var(--bs-list-group-action-color);
-    text-align: inherit
+    text-align: inherit;
+    user-select: none;
 }
 
 .list-group-item-action:focus,
@@ -5893,7 +5899,14 @@ fieldset:disabled .btn {
     z-index: 1;
     color: var(--bs-list-group-action-hover-color);
     text-decoration: none;
-    background-color: var(--bs-list-group-action-hover-bg)
+    background-image: var(--bs-gradient) !important;
+    background-color: #e9ecef !important;
+    /* background-color: var(--bs-list-group-action-hover-bg) */
+}
+
+.list-group-item-action.bg-danger:hover {
+    background-image: var(--bs-gradient) !important;
+    background-color: #af0404 !important;
 }
 
 .list-group-item-action:active {
@@ -8836,6 +8849,10 @@ fieldset:disabled .btn {
 
 .w-45 {
     width: 45% !important
+}
+
+.w-49 {
+    width: 49% !important
 }
 
 .w-50 {
@@ -14794,6 +14811,10 @@ fieldset:disabled .btn {
         width: 35% !important
     }
 
+    .w-lg-39 {
+        width: 39% !important
+    }
+
     .w-lg-40 {
         width: 40% !important
     }
@@ -20047,6 +20068,7 @@ fieldset:disabled .btn {
 
 
 /* CUSTOM CSS */
+
 .options {
     border-top-right-radius: 0 !important;
     border-bottom-right-radius: 0 !important;
@@ -20070,6 +20092,44 @@ tbody img {
 .product-img {
     width: 70px;
     height: 70px;
+}
+
+.search-img {
+    width: 50px;
+    height: 50px;
+}
+
+.input-group-text .start {
+    border-radius: 0;
+}
+
+.form-control {
+    border-radius: .5rem;
+    border-top-right-radius: .5rem;
+    border-bottom-right-radius: .5rem;
+    border-left-width: 1px
+}
+
+.col-2-5 {
+    flex: 0 0 auto;
+    width: 20%;
+}
+
+.col-2-7 {
+    flex: 0 0 auto;
+    width: 22%;
+    padding: 0;
+}
+
+.col-9-3 {
+    flex: 0 0 auto;
+    width: 78%;
+    padding: 0;
+}
+
+.col-9-5 {
+    flex: 0 0 auto;
+    width: 80%;
 }
 /* CUSTOM CSS */
 
@@ -21400,41 +21460,6 @@ tbody img {
     padding-left: 10px;
     padding-right: 10px
 }
-
-/* custom */
-.input-group-text .start {
-    border-radius: 0;
-}
-
-.form-control {
-    border-radius: .5rem;
-    border-top-right-radius: .5rem;
-    border-bottom-right-radius: .5rem;
-    border-left-width: 1px
-}
-
-.col-2-5 {
-    flex: 0 0 auto;
-    width: 20%;
-}
-
-.col-2-7 {
-    flex: 0 0 auto;
-    width: 22%;
-    padding: 0;
-}
-
-.col-9-3 {
-    flex: 0 0 auto;
-    width: 78%;
-    padding: 0;
-}
-
-.col-9-5 {
-    flex: 0 0 auto;
-    width: 80%;
-}
-/* custom */
 
 .focused {
     box-shadow: 0 0 0 2px #e9aede;

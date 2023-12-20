@@ -1,5 +1,16 @@
+$(document).ready(function () {
+    $('#example2').DataTable({
+        "paging": true,
+        "lengthChange": false,
+        "searching": false,
+        "ordering": true,
+        "info": true,
+        "autoWidth": false,
+    });
+})
+
 // Handler
-$('tbody').on('click', '.detail, .delete, .cannot-delete', function () {
+$('tbody').on('click', '.detail, .delete, .cannot-delete, .status', function () {
     const categoryId = $(this).data("id");
 
     const clickedElement = this;
@@ -19,7 +30,7 @@ $('tbody').on('click', '.detail, .delete, .cannot-delete', function () {
                         break;
 
                     case $(clickedElement).hasClass('delete'):
-                        $('.current-category').text(`(${category.name})`);
+                        $('.current-cate').text(`(${category.name})`);
                         $('#delete-category-id').val(category._id);
                         $('#deleteModal').modal('show');
                         break;
@@ -27,6 +38,10 @@ $('tbody').on('click', '.detail, .delete, .cannot-delete', function () {
                     case $(clickedElement).hasClass('cannot-delete'):
                         $('#message-modal-fail').text('Cannot delete. There are products associated with it.');
                         $('#failModal').modal('show');
+                        break;
+
+                    case $(clickedElement).hasClass('status'):
+                        displayCategoryActived(category);
                         break;
 
                     default:
@@ -47,6 +62,64 @@ $('tbody').on('click', '.detail, .delete, .cannot-delete', function () {
         }
     });
 });
+
+// Active/Unactive Cate
+function displayCategoryActived(category) {
+    $('.current-cate').text(`(${category.name})`);
+    if (category.actived) {
+        $('#unactive-status').show();
+        $('#active-status').hide();
+    } else {
+        $('#unactive-status').hide();
+        $('#active-status').show();
+    }
+    $('#actived-cate-id').val(category._id);
+    $('#activedValue').val(!category.actived);
+    $('#toggleActiveModal').modal('show');
+}
+
+function changeCategoryActived() {
+    const data = {
+        categoryId: $('#actived-cate-id').val(),
+        actived: $('#activedValue').val() === 'false' ? false : true
+    };
+
+    $.ajax({
+        url: '/category/update',
+        method: 'PUT',
+        dataType: 'json',
+        data: data,
+        success: function (response) {
+            if (response.success) {
+                $('#btn-ok-reload').show();
+                $('#btn-ok-noreload').hide();
+
+                $('#modal-success-title').text(response.title);
+                $('#modal-success-msg').text(response.message);
+                $('#successModal').modal('show');
+            }
+        },
+        error: function (xhr, status, error) {
+            let msg;
+            if (xhr.status === 400) {
+                const response = JSON.parse(xhr.responseText);
+                if (response.type === 0 && response.errors && response.errors.length > 0) {
+                    const inputError = response.errors;
+                    inputError.forEach(input => {
+                        $(`#${input.field}`).removeClass('is-valid').addClass('is-invalid');
+                        msg += input.msg + '<br>';
+                    })
+                } else {
+                    msg = response.message;
+                }
+            } else {
+                msg = error;
+            }
+            $('#message-modal-fail').html(msg);
+            $('#failModal').modal('show');
+        }
+    });
+}
 
 // Detail
 function displayCategoryDetail(category) {
@@ -100,7 +173,7 @@ function confirmDel() {
                 listItem.remove();
                 $('#btn-ok-reload').hide();
                 $('#btn-ok-noreload').show();
-                
+
                 $('#modal-success-title').text(response.title);
                 $('#modal-success-msg').text(response.message);
                 $('#successModal').modal('show');

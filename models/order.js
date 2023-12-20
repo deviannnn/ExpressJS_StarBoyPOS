@@ -2,14 +2,8 @@ const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema({
     Id: { type: String, unique: true, required: true },
-    customer: {
-        Id: { type: String, unique: true, required: true, default: 'WG' },
-        name: { type: String, unique: true, required: true, default: 'Walk-in Guest' }
-    },
-    cashier: {
-        Id: { type: String, unique: true, required: true },
-        name: { type: String, unique: true, required: true }
-    },
+    customer: { type: String, ref: 'Customer', required: true, default: 'WG' },
+    cashier: { type: String, ref: 'Account', required: true },
     summaryAmount: {
         subTotal: { type: Number, required: true },
         discount: { type: Number, default: 0 },
@@ -17,7 +11,7 @@ const orderSchema = new mongoose.Schema({
         totalAmount: { type: Number, required: true }
     },
     items: [{
-        product: { type: String, required: true },
+        barcode: { type: String, ref: 'Variant', required: true },
         quantity: { type: Number, required: true },
         price: { type: Number, required: true },
         amount: { type: Number, required: true }
@@ -36,6 +30,30 @@ const orderSchema = new mongoose.Schema({
         datetime: { type: Date, required: true, default: Date.now },
     }]
 });
+
+orderSchema.statics.getNextOrderNo = async function () {
+    try {
+        const today = new Date();
+
+        const ordersInDay = await this.find({ created: { $gte: today.setHours(0, 0, 0, 0) } });
+
+        if (ordersInDay.length > 0) {
+            const sortedOrders = ordersInDay.sort((a, b) => {
+                const last3DigitsA = parseInt(a.Id.substring(11), 10);
+                const last3DigitsB = parseInt(b.Id.substring(11), 10);
+                return last3DigitsB - last3DigitsA;
+            });
+
+            const lastON = parseInt(sortedOrders[0].Id.substring(11), 10);
+            return lastON + 1;
+        }
+
+        return 1;
+    } catch (error) {
+        console.error('Error getting next order number:', error);
+        throw error;
+    }
+};
 
 const Order = mongoose.model('Order', orderSchema);
 

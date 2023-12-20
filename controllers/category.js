@@ -25,7 +25,7 @@ const create = async (req, res) => {
 
 const getAll = async (req, res) => {
     try {
-        const categories = await Category.find();
+        const categories = await Category.find({ actived: true });
 
         res.status(200).json({ success: true, categories: categories });
     } catch (error) {
@@ -48,8 +48,8 @@ const getByID = async (req, res) => {
     }
 }
 
-const updateName = async (req, res) => {
-    const { categoryId, name } = req.body;
+const update = async (req, res) => {
+    const { categoryId, name, actived } = req.body;
 
     try {
         const updatedCategory = await Category.findOne({ _id: categoryId });
@@ -57,11 +57,19 @@ const updateName = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Category not found.' });
         }
 
-        if (name === updatedCategory.name) {
+        let diff = false;
+        if (name !== undefined && name !== updatedCategory.name) {
+            updatedCategory.name = name;
+            diff = true;
+        }
+        if (actived !== undefined && actived !== updatedCategory.actived) {
+            updatedCategory.actived = actived;
+            diff = true;
+        }
+        if (!diff) {
             return res.status(400).json({ success: false, message: 'Nothing to update.' });
         }
 
-        updatedCategory.name = name;
         updatedCategory.updated.push({
             Id: req.user.Id,
             name: req.user.name,
@@ -70,7 +78,7 @@ const updateName = async (req, res) => {
 
         await updatedCategory.save();
 
-        return res.status(200).json({ success: true, title: 'Updated!', message: 'Category\'s name updated successfully.', category: updatedCategory });
+        return res.status(200).json({ success: true, title: 'Updated!', message: 'Category updated successfully.', category: updatedCategory });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
@@ -251,4 +259,4 @@ const renderHandleView = async (req, res, next) => {
     }
 }
 
-module.exports = { renderCategoryList, renderHandleView, getAll, getByID, create, updateName, getSpec, addSpecs, updateSpecs, removeSpecs, remove };
+module.exports = { renderCategoryList, renderHandleView, getAll, getByID, create, update, getSpec, addSpecs, updateSpecs, removeSpecs, remove };

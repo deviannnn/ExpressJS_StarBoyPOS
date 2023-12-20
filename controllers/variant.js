@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Variant = require('../models/variant');
+const Product = require('../models/product');
 
 const create = async (req, res) => {
     const { productId, barcode, color, quantity, warn, cost, price } = req.body;
@@ -161,4 +162,41 @@ const uploadImg = async (req, res) => {
     }
 }
 
-module.exports = { getAllByProductID, getByBarcode, create, update, remove, uploadImg };
+const search = async (req, res) => {
+    const searchTerm = req.body.searchTerm;
+
+    try {
+        const productIds = await Product.find({
+            name: { $regex: searchTerm, $options: 'i' }
+        }).distinct('_id');
+
+        const results = await Variant.find({
+            $or: [
+                { 'product': { $in: productIds } },
+                { color: { $regex: searchTerm, $options: 'i' } },
+                { barcode: { $regex: searchTerm, $options: 'i' } }
+            ]
+        })
+            .populate({
+                path: 'product',
+                select: 'name'
+            })
+            .exec();
+
+        const formattedResults = results.map(result => ({
+            productName: result.product.name,
+            productId: result.product._id.toString(),
+            color: result.color,
+            barcode: result.barcode,
+            price: result.price,
+            img: result.img,
+        }));
+
+        res.json(formattedResults);
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+module.exports = { getAllByProductID, getByBarcode, create, update, remove, uploadImg, search };

@@ -173,7 +173,18 @@ const checkUAccount = [
 const checkNameCategory = [
     check('name')
         .not().isEmpty().withMessage('Category\'s name cannot be empty.')
+        .matches(/^[\p{L}\s]*$/u).withMessage('Category\'s name should only contain letters and spaces.')
+];
+
+const checkUCategory = [
+    check('name')
+        .optional()
+        .not().isEmpty().withMessage('Category\'s name cannot be empty.')
         .matches(/^[\p{L}\s]*$/u).withMessage('Category\'s name should only contain letters and spaces.'),
+
+    check('actived')
+        .optional()
+        .isBoolean().withMessage('Invalid actived value.')
 ];
 
 const checkSpecsCategory = [
@@ -334,7 +345,7 @@ const checkUVariant = [
         .optional()
         .not().isEmpty().withMessage('Quantity cannot be empty.')
         .isNumeric().withMessage('Quantity must be a number.'),
-        
+
     check('warn')
         .optional()
         .not().isEmpty().withMessage('Warn cannot be empty.')
@@ -359,7 +370,7 @@ const checkCustomer = [
             if (existingCustomer) {
                 throw new Error('Phone number already exists.');
             }
-        }),
+        })
 ];
 
 const checkUCustomer = [
@@ -380,8 +391,52 @@ const checkUCustomer = [
                     throw new Error('Phone number already exists.');
                 }
             }
-        }),
+        })
 ];
+
+const checkOrder = [
+    check('customer')
+        .optional()
+        .not().isEmpty().withMessage('Customer cannot be empty.')
+        .custom(async (value) => {
+            const customer = await Customer.findOne({ Id: value });
+            if (!customer) {
+                throw new Error('Customer does not exist');
+            }
+        }),
+
+    check('cashier')
+        .not().isEmpty().withMessage('Cashier cannot be empty.')
+        .custom(async (value) => {
+            const cashier = await Account.findOne({ Id: value, actived: true, locked: false });
+            if (!cashier) {
+                throw new Error('Cashier does not exist or is not available');
+            }
+        }),
+
+    check('summaryAmount.subTotal').notEmpty().isNumeric().withMessage('Subtotal must be a number'),
+    check('summaryAmount.discount').optional().isNumeric().withMessage('Discount must be a number'),
+    check('summaryAmount.voucher').optional().isNumeric().withMessage('Voucher must be a number'),
+    check('summaryAmount.totalAmount').notEmpty().isNumeric().withMessage('Total amount must be a number'),
+
+    check('items.*.barcode')
+        .notEmpty().withMessage('Item barcode is required')
+        .custom(async (value) => {
+            const item = await Variant.findOne({ barcode: value, actived: true });
+            if (!item) {
+                throw new Error(`Item with barcode ${value} does not exist or is not active`);
+            }
+        }),
+    check('items.*.quantity').notEmpty().isInt({ min: 1 }).withMessage('Item quantity must be a positive integer'),
+    check('items.*.price').notEmpty().isNumeric().withMessage('Item price must be a number'),
+    check('items.*.amount').notEmpty().isNumeric().withMessage('Item amount must be a number'),
+
+    check('payment.method').notEmpty().isIn(['cash', 'banking']).withMessage('Payment method must be cash or banking'),
+    check('payment.receive').notEmpty().isNumeric().withMessage('Receive must be a number'),
+    check('payment.change').notEmpty().isNumeric().withMessage('Change must be a number'),
+    check('payment.type').notEmpty().isIn(['full payment', 'installment']).withMessage('Payment type must be full payment or installment'),
+    check('payment.remainAmount').notEmpty().isNumeric().withMessage('Remain amount must be a number'),
+]
 
 function validate(req, res, next) {
     const errors = validationResult(req);
@@ -393,6 +448,6 @@ function validate(req, res, next) {
 }
 
 module.exports = {
-    validate, checkRegister, checkUAccount, checkNameCategory, checkSpecsCategory, checkProduct,
-    checkUProduct, checkVariant, checkUVariant, checkCustomer, checkUCustomer
+    validate, checkRegister, checkUAccount, checkNameCategory, checkSpecsCategory, checkUCategory,
+    checkProduct, checkUProduct, checkVariant, checkUVariant, checkCustomer, checkUCustomer, checkOrder
 };

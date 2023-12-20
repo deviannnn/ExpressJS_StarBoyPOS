@@ -8,7 +8,7 @@ $('#name').on('blur', () => {
     const newName = $('#name').val();
 
     $.ajax({
-        url: '/category/updateName',
+        url: '/category/update',
         method: 'PUT',
         dataType: 'json',
         data: {

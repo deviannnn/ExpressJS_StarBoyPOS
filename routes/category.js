@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 
 const categoryController = require('../controllers/category');
-const { validate, checkNameCategory, checkSpecsCategory } = require('../middlewares/validate');
+const { validate, checkNameCategory, checkSpecsCategory, checkUCategory } = require('../middlewares/validate');
 const { isAdmin } = require('../middlewares/auth');
 
 router.get('/', categoryController.renderCategoryList);
@@ -19,7 +19,7 @@ router.get('/handle', categoryController.renderHandleView);
 
 router.post('/create', [checkNameCategory, validate], categoryController.create);
 
-router.put('/updateName', [checkNameCategory, validate], categoryController.updateName);
+router.put('/update', [checkUCategory, validate], categoryController.update);
 
 router.post('/addSpecs', [checkSpecsCategory, validate], categoryController.addSpecs);
 

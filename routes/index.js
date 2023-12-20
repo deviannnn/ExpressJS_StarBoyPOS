@@ -45,6 +45,8 @@ const accountRouter = require('./account');
 const categoryRouter = require('./category');
 const productRouter = require('./product');
 const variantRouter = require('./variant');
+const orderRouter = require('./order');
+
 const purchaseRouter = require('./purchase');
 const supplierRouter = require('./supplier');
 
@@ -53,6 +55,8 @@ router.use('/customer', customerRouter);
 router.use('/category', categoryRouter);
 router.use('/product', productRouter);
 router.use('/variant', variantRouter);
+router.use('/order', orderRouter);
+
 router.use('/purchase', purchaseRouter);
 router.use('/supplier', supplierRouter);
 

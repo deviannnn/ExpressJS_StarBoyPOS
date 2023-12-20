@@ -4,4 +4,14 @@ function formatDate(dateString) {
     return new Intl.DateTimeFormat('en-GB', options).format(date);
 }
 
-module.exports = { formatDate };
+function formatForBirthdayInput(birthdayStr) {
+    const birthdayDate = new Date(birthdayStr);
+
+    const year = birthdayDate.getFullYear();
+    const month = String(birthdayDate.getMonth() + 1).padStart(2, '0');
+    const day = String(birthdayDate.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+}
+
+module.exports = { formatDate, formatForBirthdayInput };
