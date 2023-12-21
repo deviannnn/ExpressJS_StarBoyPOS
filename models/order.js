@@ -2,8 +2,8 @@ const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema({
     Id: { type: String, unique: true, required: true },
-    customer: { type: String, ref: 'Customer', required: true, default: 'WG' },
-    cashier: { type: String, ref: 'Account', required: true },
+    customer: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer', required: true },
+    cashier: { type: mongoose.Schema.Types.ObjectId, ref: 'Account', required: true },
     summaryAmount: {
         subTotal: { type: Number, required: true },
         discount: { type: Number, default: 0 },
@@ -11,7 +11,7 @@ const orderSchema = new mongoose.Schema({
         totalAmount: { type: Number, required: true }
     },
     items: [{
-        barcode: { type: String, ref: 'Variant', required: true },
+        variant: { type: mongoose.Schema.Types.ObjectId, ref: 'Variant', required: true },
         quantity: { type: Number, required: true },
         price: { type: Number, required: true },
         amount: { type: Number, required: true }

@@ -12,6 +12,7 @@ const generateJWT = async (account, source) => {
 
         const token = await jwt.sign(
             {
+                _id: account._id,
                 Id: account.Id,
                 gmail: account.gmail,
                 name: account.profile.name,
@@ -37,11 +38,9 @@ const generateJWT = async (account, source) => {
 const extractToken = (req) => {
     if (req.query && req.query.token) {
         return (req.query).token;
-    }
-    if (req.cookies && req.cookies['jwt']) {
+    } else if (req.cookies && req.cookies['jwt']) {
         return req.cookies['jwt'];
-    }
-    if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
+    } else if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
         return req.headers.authorization.split(' ')[1];
     }
     return null;

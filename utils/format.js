@@ -4,6 +4,12 @@ function formatDate(dateString) {
     return new Intl.DateTimeFormat('en-GB', options).format(date);
 }
 
+function formatDateTime(dateString) {
+    const options = { day: 'numeric', month: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true };
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB', options);
+}
+
 function formatForBirthdayInput(birthdayStr) {
     const birthdayDate = new Date(birthdayStr);
 
@@ -14,4 +20,4 @@ function formatForBirthdayInput(birthdayStr) {
     return `${year}-${month}-${day}`;
 }
 
-module.exports = { formatDate, formatForBirthdayInput };
+module.exports = { formatDate, formatDateTime, formatForBirthdayInput };

@@ -171,6 +171,7 @@ const search = async (req, res) => {
         }).distinct('_id');
 
         const results = await Variant.find({
+            actived: true,
             $or: [
                 { 'product': { $in: productIds } },
                 { color: { $regex: searchTerm, $options: 'i' } },
@@ -184,6 +185,7 @@ const search = async (req, res) => {
             .exec();
 
         const formattedResults = results.map(result => ({
+            _id: result._id.toString(),
             productName: result.product.name,
             productId: result.product._id.toString(),
             color: result.color,
@@ -192,10 +194,9 @@ const search = async (req, res) => {
             img: result.img,
         }));
 
-        res.json(formattedResults);
+        return res.json(formattedResults);
     } catch (error) {
-        console.log(error.message);
-        res.status(500).json({ error: 'Internal Server Error' });
+        return res.status(500).json({ error: 'Internal Server Error' });
     }
 };
 

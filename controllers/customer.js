@@ -148,10 +148,9 @@ const search = async (req, res) => {
             discount: result.discount
         }));
 
-        res.json(formattedResults);
+        return res.json(formattedResults);
     } catch (error) {
-        console.log(error.message);
-        res.status(500).json({ error: 'Internal Server Error' });
+        return res.status(500).json({ error: 'Internal Server Error' });
     }
 };
 

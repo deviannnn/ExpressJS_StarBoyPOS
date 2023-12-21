@@ -5,7 +5,7 @@ const orderController = require('../controllers/order');
 const { validate, checkOrder } = require('../middlewares/validate');
 const { isAdmin } = require('../middlewares/auth');
 
-// router.get('/', orderController.renderProductList);
+router.get('/invoice/:orderId', orderController.renderInvoice);
 
 router.post('/getAll', orderController.getAll);
 

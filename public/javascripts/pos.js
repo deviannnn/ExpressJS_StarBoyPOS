@@ -42,9 +42,9 @@ function displaySearchResults(results) {
             const resultText = `(${result.barcode}) ${result.productName} - ${result.color} `;
             const imgsrc = `/uploads/product_variants/${result.img !== 'default.png' ? `${result.productId}/` : ''}${result.img}`;
             const listItem = `
-                <li data-product-name="${resultText}" data-product-color="${result.color}"
-                    data-product-barcode="${result.barcode}" data-product-price="${result.price}" 
-                    data-product-img="${imgsrc}">
+                <li data-variant-name="${resultText}" data-variant-color="${result.color}"
+                    data-variant-ref="${result._id}" data-variant-price="${result.price}" 
+                    data-variant-img="${imgsrc}">
                     <a class="dropdown-item"><img class="search-img me-2" src="${imgsrc}" />${resultText}</a>
                 </li>`;
             $('#searchResults').append(listItem);
@@ -55,39 +55,38 @@ function displaySearchResults(results) {
 }
 
 $('#searchResults').on('click', 'li', function () {
-    const name = $(this).data('product-name');
-    const barcode = $(this).data('product-barcode');
-    const price = $(this).data('product-price');
-    const img = $(this).data('product-img');
+    const _id = $(this).data('variant-ref');
+    const name = $(this).data('variant-name');
+    const price = $(this).data('variant-price');
+    const img = $(this).data('variant-img');
 
-    const existingRow = $(`#list-items tr[data-barcode="${barcode}"]`);
+    const existingRow = $(`#list-items tr[data-variant-ref="${_id}"]`);
     if (existingRow.length > 0) {
         const currentQuantity = parseInt(existingRow.find('.quan').text());
         existingRow.find('.quan').text(currentQuantity + 1);
         updateAmount(existingRow);
     } else {
         const newRow = `
-        <tr data-barcode="${barcode}">
+        <tr data-variant-ref="${_id}">
             <td>
                 <div class="d-flex align-items-center">
-                    <img src="${img}" alt="${barcode}">
+                    <img src="${img}" alt="${_id}">
                     <h6 class="text-md ms-3">${name}</h6>
                 </div>
             </td>
-            <td class="price text-sm">${currency(price * 1000)}</td>
-            <td class="text-center text-lg">
-                <span class="dec-quan btn badge bg-gradient-danger">–</span>
+            <td class="price text-end text-sm pe-4">${currency(price * 1000)}</td>
+            <td class="text-center text-md">
+                <span class="dec-quan btn badge bg-gradient-danger m-0">–</span>
                 <span class="quan badge bg-gradient-light text-dark">1</span>
-                <span class="inc-quan btn badge bg-gradient-success">+</span>
+                <span class="inc-quan btn badge bg-gradient-success m-0">+</span>
             </td>
-            <td class="amount text-sm">${currency(price * 1000)}</td>
+            <td class="amount text-end text-sm pe-4">${currency(price * 1000)}</td>
             <td>
                 <a class="delete">
                     <i class="far fa-trash-alt text-danger text-gradient" aria-hidden="true"></i>
                 </a>
             </td>
-        </tr>
-        `;
+        </tr>`;
 
         $('#list-items').append(newRow);
         updateTotal();
@@ -154,14 +153,21 @@ function updateTotal() {
 
     $('.totalItems').text(totalItems);
     $('#subTotal').val(currency(subTotal));
-    $('#totalPayable').text(currency(totalAmount));
-    $('#totalPaying').text(currency(totalAmount));
-    $('#receive').val(totalAmount / 1000);
     $('#totalAmount').val(currency(totalAmount));
 }
 
 // Payment
 function openPaymentModal() {
+    $('#list-items tr').filter(function () {
+        return parseInt($(this).find('.quan').text()) === 0;
+    }).remove();
+
+    const totalAmount = number($('#totalAmount').val()) || 0;
+    $('#totalPayable').text(currency(totalAmount));
+    $('#totalPaying').text(currency(totalAmount));
+    $('#receive').val(totalAmount / 1000);
+    updateChange();
+
     $('#paymentModal').modal('show');
 }
 
@@ -193,6 +199,11 @@ function updateChange() {
 
     const change = totalPaying - totalPayable;
 
+    $('#orderBtn').prop('disabled', true);
+    if (change >= 0) {
+        $('#orderBtn').prop('disabled', false);
+    }
+
     $('#change').text(currency(change));
 }
 
@@ -203,8 +214,84 @@ function clearValues() {
     updateChange();
 }
 
+$('#receive').on('input', function () {
+    let inputValue = $(this).val().replace(/[^0-9]/g, '');
+
+    $(this).val(inputValue);
+
+    $('#totalPaying').text(currency(inputValue * 1000));
+    updateChange();
+});
+
+// Create Order
+function createOrder() {
+    const items = [];
+    $('#list-items tr').each(function () {
+        items.push({
+            variant: $(this).data('variant-ref'),
+            price: number($(this).find('.price').text()) / 1000,
+            quantity: number($(this).find('.quan').text()),
+            amount: number($(this).find('.amount').text()) / 1000
+        })
+    })
+
+    const data = {
+        customer: $('#customerId').val(),
+        summaryAmount: {
+            subTotal: number($('#subTotal').val()) / 1000,
+            discount: number($('#discount').val()) / 1000,
+            voucher: number($('#voucher').val()) / 1000,
+            totalAmount: number($('#totalAmount').val()) / 1000
+        },
+        items: items,
+        payment: {
+            method: $('#method').val(),
+            receive: number($('#totalPaying').text()) / 1000,
+            change: number($('#change').text()) / 1000,
+            type: $('#type').val(),
+            remainAmount: 0
+        }
+    }
+    if (data.customer === '') {
+        delete data.customer;
+    }
+
+    $.ajax({
+        url: '/order/create',
+        method: 'POST',
+        dataType: 'json',
+        data: data,
+        success: function (response) {
+            if (response.success) {
+                window.location.href = `/order/invoice/${response.order.Id}`
+            }
+        },
+        error: function (xhr, status, error) {
+            let msg = '';
+            if (xhr.status === 400) {
+                const response = JSON.parse(xhr.responseText);
+                if (response.type === 0 && response.errors && response.errors.length > 0) {
+                    const inputError = response.errors;
+                    inputError.forEach(input => {
+                        $(`#${input.field}`).removeClass('is-valid').addClass('is-invalid');
+                        msg += input.msg + '<br>';
+
+                    })
+                } else {
+                    msg = response.message;
+                }
+            } else {
+                msg = error;
+            }
+            $('#message-modal-fail').html(msg);
+            $('#failModal').modal('show');
+        }
+    });
+}
+
 // Customer
 $('#cancel-customer').click(function () {
+    $('#customerId').val('');
     $('#customer').val('').prop('disabled', false);
     $('#regist-customer').show();
     $(this).hide();
@@ -226,6 +313,8 @@ function registerCustomer() {
         success: function (response) {
             if (response.success) {
                 const customer = response.customer;
+
+                $('#customerId').val(customer.Id);
                 $('#customer').val(`(${customer.Id}) ${customer.name}`).prop('disabled', true);
                 $('#cancel-customer').show();
                 $('#regist-customer').hide();
@@ -309,6 +398,7 @@ $('#searchCustomer').on('click', 'li', function () {
     const phone = $(this).data('customer-phone');
     const discount = $(this).data('customer-discount');
 
+    $('#customerId').val(Id);
     $('#customer').val(`(${Id}) ${name}`).prop('disabled', true);
     $('#cancel-customer').show();
     $('#regist-customer').hide();
@@ -320,9 +410,13 @@ $('#searchCustomer').on('click', 'li', function () {
 });
 
 // Utils
-$('#list-items').on('DOMSubtreeModified', function () {
-    const productCount = $(this).find('tr').length;
-    $('#paymentBtn').prop('disabled', productCount === 0);
+$('#total').on('DOMSubtreeModified', function () {
+    const itemCount = number($(this).text());
+    $('#paymentBtn').prop('disabled', itemCount === 0);
+});
+
+$('#paymentModal').on('hidden.bs.modal', function () {
+    clearValues();
 });
 
 function currency(number) {

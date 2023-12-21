@@ -401,41 +401,61 @@ const checkOrder = [
         .custom(async (value) => {
             const customer = await Customer.findOne({ Id: value });
             if (!customer) {
-                throw new Error('Customer does not exist');
+                throw new Error('Customer does not exist.');
             }
         }),
 
-    check('cashier')
-        .not().isEmpty().withMessage('Cashier cannot be empty.')
-        .custom(async (value) => {
-            const cashier = await Account.findOne({ Id: value, actived: true, locked: false });
-            if (!cashier) {
-                throw new Error('Cashier does not exist or is not available');
-            }
-        }),
+    check('summaryAmount.subTotal')
+        .notEmpty().withMessage('Subtotal is required')
+        .isInt({ gt: 0 }).withMessage('Subtotal must be greater than 0.'),
 
-    check('summaryAmount.subTotal').notEmpty().isNumeric().withMessage('Subtotal must be a number'),
-    check('summaryAmount.discount').optional().isNumeric().withMessage('Discount must be a number'),
-    check('summaryAmount.voucher').optional().isNumeric().withMessage('Voucher must be a number'),
-    check('summaryAmount.totalAmount').notEmpty().isNumeric().withMessage('Total amount must be a number'),
+    check('summaryAmount.discount')
+        .optional()
+        .isInt({ min: 0 }).withMessage('Discount must be greater than 0.'),
 
-    check('items.*.barcode')
-        .notEmpty().withMessage('Item barcode is required')
+    check('summaryAmount.voucher')
+        .optional()
+        .isInt({ min: 0 }).withMessage('Voucher must be greater than 0.'),
+
+    check('summaryAmount.totalAmount')
+        .notEmpty().withMessage('Total amount is required')
+        .isInt({ gt: 0 }).withMessage('Total amount must be greater than 0.'),
+
+    check('items.*.variant')
+        .notEmpty().withMessage('Item is required')
         .custom(async (value) => {
-            const item = await Variant.findOne({ barcode: value, actived: true });
+            const item = await Variant.findOne({ _id: value, actived: true });
             if (!item) {
-                throw new Error(`Item with barcode ${value} does not exist or is not active`);
+                throw new Error(`Item does not exist or is not active.`);
             }
         }),
-    check('items.*.quantity').notEmpty().isInt({ min: 1 }).withMessage('Item quantity must be a positive integer'),
-    check('items.*.price').notEmpty().isNumeric().withMessage('Item price must be a number'),
-    check('items.*.amount').notEmpty().isNumeric().withMessage('Item amount must be a number'),
 
+    check('items.*.quantity')
+        .notEmpty().withMessage('Item quantity is required')
+        .isInt({ gt: 0 }).withMessage('Item quantity must be greater than 0.'),
+
+    check('items.*.price')
+        .notEmpty().withMessage('Item price is required')
+        .isInt({ gt: 0 }).withMessage('Item price must be greater than 0.'),
+
+    check('items.*.amount')
+        .notEmpty().withMessage('Item amount is required')
+        .isInt({ gt: 0 }).withMessage('Item amount must be greater than 0.'),
+
+    check('payment.receive')
+        .notEmpty().withMessage('Receive is required')
+        .isInt({ gt: 0 }).withMessage('Receive must be greater than 0.'),
+
+    check('payment.change')
+        .notEmpty().withMessage('Change is required')
+        .isInt({ min: 0 }).withMessage('Change must be an integer'),
+
+    check('payment.remainAmount')
+        .notEmpty().withMessage('Remain amount is required')
+        .isInt({ min: 0 }).withMessage('Remain amount must be greater than 0.'),
+        
     check('payment.method').notEmpty().isIn(['cash', 'banking']).withMessage('Payment method must be cash or banking'),
-    check('payment.receive').notEmpty().isNumeric().withMessage('Receive must be a number'),
-    check('payment.change').notEmpty().isNumeric().withMessage('Change must be a number'),
     check('payment.type').notEmpty().isIn(['full payment', 'installment']).withMessage('Payment type must be full payment or installment'),
-    check('payment.remainAmount').notEmpty().isNumeric().withMessage('Remain amount must be a number'),
 ]
 
 function validate(req, res, next) {

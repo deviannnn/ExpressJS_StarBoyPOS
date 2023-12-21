@@ -36,7 +36,7 @@ const isPasswordChange = (req, res, next) => {
 };
 
 const isLoggedIn = (req, res, next) => {
-    if (req.user && req.user.source === 'login') {
+    if (req.user && req.user.actived && !req.user.locked && req.user.source === 'login') {
         return next();
     } else {
         return res.redirect('/login');
