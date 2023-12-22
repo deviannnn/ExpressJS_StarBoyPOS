@@ -20,4 +20,9 @@ function formatForBirthdayInput(birthdayStr) {
     return `${year}-${month}-${day}`;
 }
 
-module.exports = { formatDate, formatDateTime, formatForBirthdayInput };
+function formatCurrency(input) {
+    const formattedCurrency = (input * 1000).toLocaleString('en-US');
+    return formattedCurrency + "đ";
+}
+
+module.exports = { formatDate, formatDateTime, formatForBirthdayInput, formatCurrency };

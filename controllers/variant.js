@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Variant = require('../models/variant');
 const Product = require('../models/product');
+const Order = require('../models/order');
 
 const create = async (req, res) => {
     const { productId, barcode, color, quantity, warn, cost, price } = req.body;
@@ -54,7 +55,7 @@ const getAllByProductID = async (req, res) => {
             updated: variant.updated
         }))
 
-        res.status(200).json({ success: true, variants: variants });
+        return res.status(200).json({ success: true, variants: variants });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
@@ -129,11 +130,17 @@ const remove = async (req, res) => {
     const { barcode } = req.body;
 
     try {
-        const deletedVariant = await Variant.findOneAndDelete({ barcode });
-
+        const deletedVariant = await Variant.findOne({ barcode });
         if (!deletedVariant) {
             return res.status(404).json({ success: false, message: 'Variant not found.' });
         }
+
+        const orderWithVariant = await Order.exists({ 'items.variant': deletedVariant._id });
+        if (orderWithVariant) {
+            return res.status(400).json({ success: false, message: 'Cannot delete. There are orders associated with it.' });
+        }
+
+        await Variant.deleteOne({ barcode });
 
         return res.status(200).json({ success: true, title: 'Deleted!', message: 'Variant deleted successfully.', variant: deletedVariant });
     } catch (error) {

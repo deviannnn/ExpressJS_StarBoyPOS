@@ -31,7 +31,7 @@ variantSchema.methods.getStatus = function () {
     if (this.timeline.length === 0) {
         return 'new';
     } else {
-        if (this.quantity === 0) {
+        if (this.quantity <= 0) {
             return 'out of stock';
         } else if (this.quantity < this.warn) {
             return 'warning';

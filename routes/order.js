@@ -2,12 +2,12 @@ var express = require('express');
 var router = express.Router();
 
 const orderController = require('../controllers/order');
-const { validate, checkOrder } = require('../middlewares/validate');
+const { validate, checkOrder, checkTimeFrame } = require('../middlewares/validate');
 const { isAdmin } = require('../middlewares/auth');
 
 router.get('/invoice/:orderId', orderController.renderInvoice);
 
-router.post('/getAll', orderController.getAll);
+router.post('/getByTimeFrame', [checkTimeFrame, validate], orderController.getByTimeFrame);
 
 router.post('/get', orderController.get);
 

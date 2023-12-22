@@ -1,8 +1,9 @@
 const Customer = require('../models/customer');
 const Account = require('../models/account');
+const Order = require('../models/order');
 const bcrypt = require('bcrypt');
 
-const { formatDate } = require('../utils/format');
+const { formatDate, formatDateTime } = require('../utils/format');
 const { generateId } = require('../utils/auto-id');
 
 const register = async (req, res) => {
@@ -46,7 +47,41 @@ const getByID = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Customer not found.' });
         }
 
-        return res.status(200).json({ success: true, customer: customer });
+        let orders = await Order.find({ customer: customer._id })
+            .populate({
+                path: 'cashier',
+                select: 'profile.name'
+            })
+            .populate({
+                path: 'items.variant',
+                populate: {
+                    path: 'product',
+                    select: 'name'
+                }
+            })
+            .sort({ created: -1 })
+            .exec();
+
+        if (orders.length > 0) {
+            orders = orders.map(order => ({
+                Id: order.Id,
+                customer: order.customer.name,
+                cashier: order.cashier.profile.name,
+                date: formatDateTime(order.created),
+                summaryAmount: order.summaryAmount,
+                payment: order.payment,
+                items: order.items.map(item => ({
+                    name: item.variant.product.name,
+                    color: item.variant.color,
+                    barcode: item.variant.barcode,
+                    quantity: item.quantity,
+                    price: item.price,
+                    amount: item.amount
+                }))
+            }))
+        }
+
+        return res.status(200).json({ success: true, customer: customer, orders: orders });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
@@ -98,10 +133,17 @@ const remove = async (req, res) => {
     const { Id } = req.body;
 
     try {
-        const deletedCustomer = await Customer.findOneAndDelete({ Id });
+        const deletedCustomer = await Customer.findOne({ Id });
         if (!deletedCustomer) {
             return res.status(404).json({ success: false, message: 'Customer not found.' });
         }
+
+        const orderWithCustomer = await Order.exists({ customer: deletedCustomer._id });
+        if (orderWithCustomer) {
+            return res.status(400).json({ success: false, message: 'Cannot delete. There are orders associated with it.' });
+        }
+
+        await Customer.deleteOne({ Id });
 
         return res.status(200).json({ success: true, title: 'Deleted!', message: 'Customer deleted successfully.', customer: deletedCustomer });
     } catch (error) {
@@ -111,11 +153,10 @@ const remove = async (req, res) => {
 
 const renderCustomerList = async (req, res, next) => {
     try {
-        let customers = await Customer.find();
+        let customers = await Customer.find({ Id: { $ne: "WG" } });
 
         if (customers.length !== 0) {
             customers = customers.map(customer => ({
-                // const productsWithCategory = await Product.find({ customer: customer._id.toString().trim() });
                 Id: customer.Id,
                 name: customer.name,
                 phone: customer.phone,

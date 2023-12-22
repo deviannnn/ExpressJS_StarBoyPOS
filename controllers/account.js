@@ -1,4 +1,5 @@
 const Account = require('../models/account');
+const Order = require('../models/order');
 const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcrypt');
@@ -307,11 +308,17 @@ const remove = async (req, res) => {
     const { Id } = req.body;
 
     try {
-        const deletedAccount = await Account.findOneAndDelete({ Id });
-
+        const deletedAccount = await Account.findOne({ Id });
         if (!deletedAccount) {
-            return res.status(400).json({ success: false, message: 'Account not found.' });
+            return res.status(404).json({ success: false, message: 'Account not found.' });
         }
+
+        const orderWithAccount = await Order.exists({ cashier: deletedAccount._id });
+        if (orderWithAccount) {
+            return res.status(400).json({ success: false, message: 'Cannot delete. There are orders associated with it.' });
+        }
+
+        await Account.deleteOne({ Id });
 
         return res.status(200).json({ success: true, title: 'Deleted!', message: 'Account deleted successfully.', account: deletedAccount });
     } catch (error) {

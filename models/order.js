@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Variant = require('./variant');
 
 const orderSchema = new mongoose.Schema({
     Id: { type: String, unique: true, required: true },
@@ -29,6 +30,30 @@ const orderSchema = new mongoose.Schema({
         name: { type: String, required: true },
         datetime: { type: Date, required: true, default: Date.now },
     }]
+});
+
+orderSchema.pre('save', async function (next) {
+    const items = this.items || [];
+
+    for (const item of items) {
+        try {
+            const variant = await Variant.findById(item.variant);
+            if (variant) {
+                variant.quantity -= item.quantity;
+                variant.timeline.push({
+                    quantity: -1*item.quantity,
+                    action: 'sell',
+                    datetime: new Date(),
+                });
+                await variant.save();
+            }
+        } catch (error) {
+            console.error(`Error updating variant quantity for item ${item.variant}: ${error.message}`);
+            throw error;
+        }
+    }
+
+    next();
 });
 
 orderSchema.statics.getNextOrderNo = async function () {

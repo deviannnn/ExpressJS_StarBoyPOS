@@ -453,9 +453,16 @@ const checkOrder = [
     check('payment.remainAmount')
         .notEmpty().withMessage('Remain amount is required')
         .isInt({ min: 0 }).withMessage('Remain amount must be greater than 0.'),
-        
+
     check('payment.method').notEmpty().isIn(['cash', 'banking']).withMessage('Payment method must be cash or banking'),
     check('payment.type').notEmpty().isIn(['full payment', 'installment']).withMessage('Payment type must be full payment or installment'),
+]
+
+const checkTimeFrame = [
+    check('timeframe')
+        .isIn(['today', 'yesterday', 'last7days', 'thisweek', 'thismonth', 'custom']).withMessage('Invalid time frame.'),
+    check('startDate').optional().isISO8601({ strict: true, strictDate: true }).withMessage('Invalid start date.'),
+    check('endDate').optional().isISO8601({ strict: true, strictDate: true }).withMessage('Invalid end date.')
 ]
 
 function validate(req, res, next) {
@@ -469,5 +476,6 @@ function validate(req, res, next) {
 
 module.exports = {
     validate, checkRegister, checkUAccount, checkNameCategory, checkSpecsCategory, checkUCategory,
-    checkProduct, checkUProduct, checkVariant, checkUVariant, checkCustomer, checkUCustomer, checkOrder
+    checkProduct, checkUProduct, checkVariant, checkUVariant, checkCustomer, checkUCustomer, checkOrder,
+    checkTimeFrame
 };

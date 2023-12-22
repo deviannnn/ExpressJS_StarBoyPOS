@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const Product = require('../models/product');
+const Variant = require('../models/variant');
+const Order = require('../models/order');
 const Category = require('../models/category');
 
 const { formatDate } = require('../utils/format');
@@ -130,8 +132,13 @@ const remove = async (req, res) => {
     const { productId } = req.body;
 
     try {
-        const deletedProduct = await Product.findOneAndDelete({ _id: productId });
+        const variants = await Variant.find({ product: productId });
+        const orderWithProduct = await Order.exists({ 'items.variant': { $in: variants.map(variant => variant._id) } });
+        if (orderWithProduct) {
+            return res.status(400).json({ success: false, message: 'Cannot delete. There are orders associated with it.' });
+        }
 
+        const deletedProduct = await Product.findOneAndDelete({ _id: productId });
         if (!deletedProduct) {
             return res.status(404).json({ success: false, message: 'Product not found.' });
         }

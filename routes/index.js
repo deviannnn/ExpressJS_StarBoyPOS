@@ -36,9 +36,9 @@ router.use((req, res, next) => {
     next();
 });
 
-router.get('/', (req, res) => { res.render('index') })
+router.get('/', (req, res) => { res.render('index', { title: 'Dashboard', script: 'dashboard' }) })
 
-router.get('/pos', (req, res) => { res.render('pos', { layout: null, tittle: 'POS' }) })
+router.get('/pos', (req, res) => { res.render('pos', { layout: null }) })
 
 const customerRouter = require('./customer');
 const accountRouter = require('./account');

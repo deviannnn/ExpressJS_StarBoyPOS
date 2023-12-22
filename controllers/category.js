@@ -88,8 +88,8 @@ const remove = async (req, res) => {
     const { categoryId } = req.body;
 
     try {
-        const productsWithCategory = await Product.find({ category: categoryId });
-        if (productsWithCategory.length > 0) {
+        const productsWithCategory = await Product.exists({ category: categoryId });
+        if (productsWithCategory) {
             return res.status(400).json({ success: false, message: 'Cannot delete. There are products associated with it.' });
         }
 
@@ -216,14 +216,14 @@ const renderCategoryList = async (req, res, next) => {
 
         if (categories.length !== 0) {
             categories = await Promise.all(categories.map(async (category) => {
-                const productsWithCategory = await Product.find({ category: category._id.toString().trim() });
+                const productsWithCategory = await Product.exists({ category: category._id.toString().trim() });
                 return {
                     id: category._id.toString().trim(),
                     name: category.name,
                     status: category.actived,
                     specs: category.specs.length > 0 ? category.specs.map((spec) => ({ name: spec.name })) : null,
                     updated: category.updated.length > 0 ? formatDate(category.updated[category.updated.length - 1].datetime) : formatDate(category.created.datetime),
-                    del: productsWithCategory.length > 0 ? false : true
+                    del: !productsWithCategory
                 }
             }))
         }

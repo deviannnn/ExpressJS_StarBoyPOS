@@ -4,7 +4,7 @@ const Order = require('../models/order');
 const Customer = require('../models/customer');
 
 const { generateOrderNumber } = require('../utils/auto-id');
-const { formatDateTime } = require('../utils/format');
+const { formatDateTime, formatCurrency } = require('../utils/format');
 
 const create = async (req, res) => {
     const { customer, summaryAmount, items, payment } = req.body;
@@ -28,17 +28,6 @@ const create = async (req, res) => {
         await newOrder.save();
 
         return res.status(201).json({ success: true, title: 'Created!', message: 'Order created successfully.', order: newOrder });
-    } catch (error) {
-        console.log(error.message)
-        return res.status(500).json({ error: 'Internal Server Error' });
-    }
-};
-
-const getAll = async (req, res) => {
-    try {
-        const orders = await Order.find();
-
-        return res.status(200).json({ success: true, orders: orders });
     } catch (error) {
         return res.status(500).json({ error: 'Internal Server Error' });
     }
@@ -117,23 +106,216 @@ const renderInvoice = async (req, res, next) => {
             customer: order.customer.name,
             cashier: order.cashier.profile.name,
             date: formatDateTime(order.created),
-            summaryAmount: order.summaryAmount,
-            payment: order.payment,
+            summaryAmount: {
+                subTotal: formatCurrency(order.summaryAmount.subTotal),
+                discount: formatCurrency(order.summaryAmount.discount),
+                voucher: formatCurrency(order.summaryAmount.voucher),
+                totalAmount: formatCurrency(order.summaryAmount.totalAmount),
+            },
+            payment: {
+                method: order.payment.method,
+                type: order.payment.type,
+                receive: formatCurrency(order.payment.receive),
+                change: formatCurrency(order.payment.change)
+            },
             items: order.items.map(item => ({
                 name: item.variant.product.name,
                 color: item.variant.color,
                 barcode: item.variant.barcode,
                 quantity: item.quantity,
-                price: item.price,
-                amount: item.amount
+                price: formatCurrency(item.price),
+                amount: formatCurrency(item.amount)
             }))
         }
 
-        res.render('invoice', { layout: null, order: order });
+        return res.render('invoice', { layout: null, order: order });
     } catch (error) {
         console.error('Error rendering invoice:', error);
         return next(createError(500));
     }
 }
 
-module.exports = { get, getAll, create, update, remove, renderInvoice };
+const getByTimeFrame = async (req, res) => {
+    const { timeframe, startDate, endDate } = req.body;
+
+    try {
+        let report = await getReport(timeframe, startDate, endDate);
+
+        let oldReport;
+        if (timeframe === 'today') {
+            oldReport = await getReport('yesterday');
+        } else if (timeframe === 'thisweek') {
+            oldReport = await getReport('previousweek');
+        } else if (timeframe === 'thismonth') {
+            oldReport = await getReport('previousmonth');
+        }
+
+        if (oldReport) {
+            const currentSales = report.analytics.totalSales;
+            const curentOrders = report.analytics.totalOrders;
+            const oldSales = oldReport.analytics.totalSales;
+            const oldOrders = oldReport.analytics.totalOrders;
+
+            report.analytics.percentSales = (oldSales !== 0) ? ((currentSales - oldSales) / oldSales * 100).toFixed(2) : 0;
+            report.analytics.percentOrders = (oldOrders !== 0) ? ((curentOrders - oldOrders) / oldOrders * 100).toFixed(2) : 0;
+            report.analytics.diffRevenue = report.analytics.revenue - oldReport.analytics.revenue;
+        }
+
+        return res.json(report);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+function getFilterByTimeFrame(timeframe, startDate, endDate) {
+    const today = new Date();
+    switch (timeframe) {
+        case 'today':
+            return {
+                created: {
+                    $gte: new Date(today.setHours(0, 0, 0, 0)),
+                    $lt: new Date(today.setHours(23, 59, 59, 999))
+                }
+            };
+
+        case 'yesterday':
+            const yesterday = new Date();
+            yesterday.setDate(today.getDate() - 1);
+            return {
+                created: {
+                    $gte: new Date(yesterday.setHours(0, 0, 0, 0)),
+                    $lt: new Date(yesterday.setHours(23, 59, 59, 999))
+                }
+            };
+
+        case 'last7days':
+            const last7days = new Date();
+            last7days.setDate(today.getDate() - 7);
+            return {
+                created: {
+                    $gte: new Date(last7days.setHours(0, 0, 0, 0)),
+                    $lt: new Date(today.setHours(23, 59, 59, 999))
+                }
+            };
+
+        case 'thisweek':
+            const startOfWeek = new Date();
+            startOfWeek.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1));
+
+            const endOfWeek = new Date(today);
+            endOfWeek.setDate(today.getDate() - today.getDay() + 7);
+
+            return {
+                created: {
+                    $gte: new Date(startOfWeek.setHours(0, 0, 0, 0)),
+                    $lt: new Date(endOfWeek.setHours(23, 59, 59, 999))
+                }
+            };
+
+        case 'previousweek':
+            const startOfPreviousWeek = new Date();
+            startOfPreviousWeek.setDate(today.getDate() - today.getDay() - 6);
+
+            const endOfPreviousWeek = new Date(today);
+            endOfPreviousWeek.setDate(today.getDate() - today.getDay());
+
+            return {
+                created: {
+                    $gte: new Date(startOfPreviousWeek.setHours(0, 0, 0, 0)),
+                    $lt: new Date(endOfPreviousWeek.setHours(23, 59, 59, 999))
+                }
+            };
+
+        case 'thismonth':
+            return {
+                created: {
+                    $gte: new Date(today.getFullYear(), today.getMonth(), 1),
+                    $lt: new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999)
+                }
+            };
+
+        case 'previousmonth':
+            const startOfPreviousMonth = new Date();
+            startOfPreviousMonth.setMonth(today.getMonth() - 1, 1);
+
+            const endOfPreviousMonth = new Date(today);
+            endOfPreviousMonth.setDate(0);
+
+            return {
+                created: {
+                    $gte: new Date(startOfPreviousMonth.setHours(0, 0, 0, 0)),
+                    $lt: new Date(endOfPreviousMonth.setHours(23, 59, 59, 999))
+                }
+            };
+
+        case 'custom':
+            if (startDate && endDate) {
+                return {
+                    created: {
+                        $gte: new Date(req.body.startDate),
+                        $lt: new Date(req.body.endDate).setHours(23, 59, 59, 999)
+                    }
+                };
+            }
+    }
+}
+
+async function getReport(timeframe, startDate, endDate) {
+    const filter = getFilterByTimeFrame(timeframe, startDate, endDate);
+
+    let analytics = {
+        totalSales: 0,
+        totalOrders: 0,
+        revenue: 0
+    };
+
+    let orders = await Order.find(filter)
+        .populate({
+            path: 'customer',
+            select: 'name'
+        })
+        .populate({
+            path: 'cashier',
+            select: 'profile.name'
+        })
+        .populate({
+            path: 'items.variant',
+            populate: {
+                path: 'product',
+                select: 'name'
+            }
+        })
+        .sort({ created: -1 })
+        .exec();
+
+    if (orders.length > 0) {
+        orders = orders.map(order => ({
+            Id: order.Id,
+            date: formatDateTime(order.created),
+            sales: order.summaryAmount.totalAmount,
+            items: order.items.map(item => ({
+                variant: {
+                    name: item.variant.product.name,
+                    color: item.variant.color,
+                    barcode: item.variant.barcode,
+                    cost: item.variant.cost,
+                    price: item.variant.price
+                },
+                quantity: item.quantity
+            }))
+        }));
+
+        analytics = {
+            totalSales: orders.reduce((total, order) => total + order.sales, 0),
+            totalOrders: orders.length,
+            revenue: orders.reduce((totalRevenue, order) =>
+                totalRevenue + order.items.reduce((itemRevenue, item) =>
+                    itemRevenue + item.quantity * (item.variant.cost - item.variant.price), 0), 0),
+        };
+    }
+
+    return { orders, analytics };
+}
+
+module.exports = { get, getByTimeFrame, create, update, remove, renderInvoice };
