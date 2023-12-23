@@ -460,7 +460,7 @@ const checkOrder = [
 
 const checkTimeFrame = [
     check('timeframe')
-        .isIn(['today', 'yesterday', 'last7days', 'thisweek', 'thismonth', 'custom']).withMessage('Invalid time frame.'),
+        .isIn(['today', 'yesterday', 'last7days', 'thisweek', 'previousweek', 'thismonth', 'previousmonth', 'custom']).withMessage('Invalid time frame.'),
     check('startDate').optional().isISO8601({ strict: true, strictDate: true }).withMessage('Invalid start date.'),
     check('endDate').optional().isISO8601({ strict: true, strictDate: true }).withMessage('Invalid end date.')
 ]

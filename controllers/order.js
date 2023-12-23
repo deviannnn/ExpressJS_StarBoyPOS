@@ -156,14 +156,13 @@ const getByTimeFrame = async (req, res) => {
             const oldSales = oldReport.analytics.totalSales;
             const oldOrders = oldReport.analytics.totalOrders;
 
-            report.analytics.percentSales = (oldSales !== 0) ? ((currentSales - oldSales) / oldSales * 100).toFixed(2) : 0;
-            report.analytics.percentOrders = (oldOrders !== 0) ? ((curentOrders - oldOrders) / oldOrders * 100).toFixed(2) : 0;
+            report.analytics.percentSales = (oldSales !== 0) ? Math.round((currentSales - oldSales) / oldSales * 100) : 0;
+            report.analytics.percentOrders = (oldOrders !== 0) ? Math.round((curentOrders - oldOrders) / oldOrders * 100) : 0;
             report.analytics.diffRevenue = report.analytics.revenue - oldReport.analytics.revenue;
         }
 
         return res.json(report);
     } catch (error) {
-        console.error(error);
         return res.status(500).json({ error: 'Internal Server Error' });
     }
 };
@@ -253,8 +252,8 @@ function getFilterByTimeFrame(timeframe, startDate, endDate) {
             if (startDate && endDate) {
                 return {
                     created: {
-                        $gte: new Date(req.body.startDate),
-                        $lt: new Date(req.body.endDate).setHours(23, 59, 59, 999)
+                        $gte: new Date(startDate),
+                        $lt: new Date(endDate).setHours(23, 59, 59, 999)
                     }
                 };
             }
@@ -267,7 +266,8 @@ async function getReport(timeframe, startDate, endDate) {
     let analytics = {
         totalSales: 0,
         totalOrders: 0,
-        revenue: 0
+        revenue: 0,
+        variantContribution: {}
     };
 
     let orders = await Order.find(filter)
@@ -290,32 +290,51 @@ async function getReport(timeframe, startDate, endDate) {
         .exec();
 
     if (orders.length > 0) {
-        orders = orders.map(order => ({
-            Id: order.Id,
-            date: formatDateTime(order.created),
-            sales: order.summaryAmount.totalAmount,
-            items: order.items.map(item => ({
-                variant: {
-                    name: item.variant.product.name,
-                    color: item.variant.color,
-                    barcode: item.variant.barcode,
-                    cost: item.variant.cost,
-                    price: item.variant.price
-                },
-                quantity: item.quantity
-            }))
-        }));
+        let totalVariantQuantity = 0;
 
-        analytics = {
-            totalSales: orders.reduce((total, order) => total + order.sales, 0),
-            totalOrders: orders.length,
-            revenue: orders.reduce((totalRevenue, order) =>
-                totalRevenue + order.items.reduce((itemRevenue, item) =>
-                    itemRevenue + item.quantity * (item.variant.cost - item.variant.price), 0), 0),
-        };
+        orders = orders.map(order => {
+            const sales = order.summaryAmount.totalAmount;
+            const orderItems = order.items.map(item => {
+                const variant = item.variant;
+                const quantity = item.quantity;
+
+                const barcode = variant.barcode.replace(/\s/g, '');
+                analytics.variantContribution[barcode] = (analytics.variantContribution[barcode] || 0) + quantity;
+                totalVariantQuantity += quantity;
+
+                return {
+                    variant: {
+                        name: variant.product.name,
+                        color: variant.color,
+                        barcode: barcode,
+                        cost: variant.cost,
+                        price: variant.price
+                    },
+                    quantity
+                };
+            });
+
+            analytics.totalSales += sales;
+            analytics.totalOrders++;
+            analytics.revenue += orderItems.reduce((itemRevenue, item) =>
+                itemRevenue + item.quantity * (item.variant.price - item.variant.cost), 0);
+
+            return {
+                Id: order.Id,
+                date: formatDateTime(order.created),
+                sales,
+                items: orderItems
+            };
+        });
+
+        for (const barcode in analytics.variantContribution) {
+            if (analytics.variantContribution.hasOwnProperty(barcode)) {
+                analytics.variantContribution[barcode] = Math.round((analytics.variantContribution[barcode] / totalVariantQuantity) * 100);
+            }
+        }
     }
 
-    return { orders, analytics };
+    return { orders, analytics, filter };
 }
 
 module.exports = { get, getByTimeFrame, create, update, remove, renderInvoice };
