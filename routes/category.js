@@ -1,32 +1,32 @@
 var express = require('express');
 var router = express.Router();
 
-const categoryController = require('../controllers/category');
+const controller = require('../controllers/category');
 const { validate, checkNameCategory, checkSpecsCategory, checkUCategory } = require('../middlewares/validate');
 const { isAdmin } = require('../middlewares/auth');
 
-router.get('/', categoryController.renderCategoryList);
+router.get('/', controller.renderCategoryList);
 
-router.post('/getAll', categoryController.getAll);
+router.post('/getAll', controller.getAll);
 
-router.post('/get', categoryController.getByID);
+router.post('/get', controller.getByID);
 
-router.post('/getSpec', categoryController.getSpec);
+router.post('/getSpec', controller.getSpec);
 
 router.use(isAdmin);
 
-router.get('/handle', categoryController.renderHandleView);
+router.get('/handle', controller.renderHandleView);
 
-router.post('/create', [checkNameCategory, validate], categoryController.create);
+router.post('/create', [checkNameCategory, validate], controller.create);
 
-router.put('/update', [checkUCategory, validate], categoryController.update);
+router.put('/update', [checkUCategory, validate], controller.update);
 
-router.post('/addSpecs', [checkSpecsCategory, validate], categoryController.addSpecs);
+router.post('/addSpecs', [checkSpecsCategory, validate], controller.addSpecs);
 
-router.put('/updateSpecs', [checkSpecsCategory, validate], categoryController.updateSpecs);
+router.put('/updateSpecs', [checkSpecsCategory, validate], controller.updateSpecs);
 
-router.delete('/removeSpecs', categoryController.removeSpecs);
+router.delete('/removeSpecs', controller.removeSpecs);
 
-router.delete('/remove', categoryController.remove);
+router.delete('/remove', controller.remove);
 
 module.exports = router;

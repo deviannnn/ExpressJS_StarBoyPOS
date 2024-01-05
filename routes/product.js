@@ -1,24 +1,24 @@
 var express = require('express');
 var router = express.Router();
 
-const productController = require('../controllers/product');
+const controller = require('../controllers/product');
 const { validate, checkProduct, checkUProduct } = require('../middlewares/validate');
 const { isAdmin } = require('../middlewares/auth');
 
-router.get('/', productController.renderProductList);
+router.get('/', controller.renderList);
 
-router.post('/getAll', productController.getAll);
+router.post('/getAll', controller.getAll);
 
-router.post('/get', productController.getByID);
+router.post('/get', controller.getByID);
 
 router.use(isAdmin);
 
-router.get('/handle', productController.renderHandleView);
+router.get('/handle', controller.renderHandleView);
 
-router.post('/create', [checkProduct, validate], productController.create);
+router.post('/create', [checkProduct, validate], controller.create);
 
-router.put('/update', [checkUProduct, validate], productController.update);
+router.put('/update', [checkUProduct, validate], controller.update);
 
-router.delete('/remove', productController.remove);
+router.delete('/remove', controller.remove);
 
 module.exports = router;

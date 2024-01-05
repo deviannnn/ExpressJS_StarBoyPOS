@@ -149,7 +149,7 @@ const remove = async (req, res) => {
     }
 };
 
-const renderProductList = async (req, res, next) => {
+const renderList = async (req, res, next) => {
     try {
         let products = await Product.find();
 
@@ -193,4 +193,4 @@ const renderHandleView = async (req, res, next) => {
     }
 }
 
-module.exports = { renderProductList, renderHandleView, getAll, getByID, create, update, remove };
+module.exports = { renderList, renderHandleView, getAll, getByID, create, update, remove };

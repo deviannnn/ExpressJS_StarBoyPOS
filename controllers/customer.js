@@ -151,7 +151,7 @@ const remove = async (req, res) => {
     }
 };
 
-const renderCustomerList = async (req, res, next) => {
+const renderList = async (req, res, next) => {
     try {
         let customers = await Customer.find({ Id: { $ne: "WG" } });
 
@@ -195,4 +195,8 @@ const search = async (req, res) => {
     }
 };
 
-module.exports = { register, getAll, getByID, update, remove, renderCustomerList, search };
+const renderRegister = (req, res) => {
+    res.render('customer_register', { title: 'Customers', subTitle: 'New Customer', script: 'customer_register' });
+}
+
+module.exports = { register, getAll, getByID, update, remove, renderList, search, renderRegister };

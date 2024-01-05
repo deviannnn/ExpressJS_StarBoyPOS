@@ -484,6 +484,7 @@ function editVariant() {
             success: function (response) {
                 if (response.success) {
                     $('#modal-success-title').text(response.title);
+                    localStorage.setItem('selectedBarcode', response.variant.barcode);
                     localStorage.setItem('updated', JSON.stringify({ success: true, message: response.message }));
                 }
             },
@@ -507,7 +508,7 @@ function editVariant() {
             },
             complete: function () {
                 if ($('#img')[0].files.length > 0) {
-                    uploadImg(selectedBarcode, productId);
+                    uploadImg(localStorage.getItem('selectedBarcode'), productId);
                 } else {
                     const updated = JSON.parse(localStorage.getItem('updated'));
                     if (updated.success) {

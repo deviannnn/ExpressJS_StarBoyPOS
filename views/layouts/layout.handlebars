@@ -79,7 +79,7 @@
                     <a class="nav-link {{#isEqual subTitle 'Profile'}} active {{/isEqual}}" href="/account/profile">
                         <div
                             class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-                            <img src="/uploads/accounts/{{user.avatar}}" class="avatar avatar-sm" alt="user image">
+                            <img src="/uploads/accounts/{{avatar}}" class="avatar avatar-sm" alt="user image">
                         </div>
                         <span class="nav-link-text ms-1">Profile</span>
                     </a>
@@ -392,7 +392,6 @@
                             <a class="opacity-3 text-dark" href="javascript:;">
                                 <svg width="12px" height="12px" class="mb-1" viewBox="0 0 45 40" version="1.1"
                                     xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                                    <title>shop </title>
                                     <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
                                         <g transform="translate(-1716.000000, -439.000000)" fill="#252f40"
                                             fill-rule="nonzero">
@@ -725,7 +724,7 @@
     {{#if script}}
     <script src="/javascripts/{{script}}.js"></script>
     {{/if}}
-
+    
     <!-- Toggle Light/Dark -->
     <script>
         $(document).ready(function () {

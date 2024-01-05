@@ -280,10 +280,6 @@ const update = async (req, res) => {
             updatedAccount.profile.birthday = birthday;
             diff = true;
         }
-        if (req.file !== undefined) {
-            updatedAccount.profile.avatar = req.file.filename;
-            diff = true;
-        }
 
         if (!diff) {
             return res.status(400).json({ success: false, message: 'Nothing to update.' });
@@ -326,9 +322,31 @@ const remove = async (req, res) => {
     }
 };
 
+const uploadAvt = async (req, res) => {
+    const { Id } = req.body;
+
+    try {
+        const uploadAccount = await Account.findOne({ Id });
+        if (!uploadAccount) {
+            return res.json({ success: false, message: 'Account not found.' });
+        }
+
+        if (req.file !== undefined) {
+            uploadAccount.profile.avatar = req.file.filename;
+            await uploadAccount.save();
+
+            return res.json({ success: true, title: 'Uploaded!', message: 'Avatar uploaded successfully.' });
+        } else {
+            return res.json({ success: false, message: 'Fail to upload avatar.' });
+        }
+    } catch (error) {
+        return res.json({ success: false, message: 'Internal Server Error.' });
+    }
+}
+
 const sendPasswordChange = async (gmail, token, template) => {
     const link = `http://localhost:3000/password/change?token=${token}`
-    const mailSubject = template === register_mail ? 'Confirm your registration': 'Confirm your password reset';
+    const mailSubject = template === register_mail ? 'Confirm your registration' : 'Confirm your password reset';
     let mailHtml = fs.readFileSync(template, 'utf8');
     mailHtml = `<p>${mailHtml.replace(/{{LINK_PLACEHOLDER}}/g, link)}</p>`;
 
@@ -341,7 +359,7 @@ const hideMailPart = (mail) => {
     return visiblePart;
 };
 
-const renderProfile = async function (req, res, next) {
+const renderProfile = async (req, res, next) => {
     try {
         const account = await Account.findOne({ Id: req.user.Id });
         if (!account) {
@@ -366,4 +384,28 @@ const renderProfile = async function (req, res, next) {
     }
 }
 
-module.exports = { register, login, logout, passwordReset, passwordChange, passwordUpdate, resendMail, getAll, getByID, update, remove, renderProfile };
+const renderList = (req, res) => {
+    res.render('account_list', { title: 'Accounts', subTitle: 'Account List', script: 'account_list' });
+}
+
+const renderRegister = (req, res) => {
+    res.render('account_register', { title: 'Accounts', subTitle: 'New Account', script: 'account_register' });
+}
+
+const renderLogin = (req, res) => {
+    res.render('login', { layout: 'pre_layout', script: 'account_login' });
+}
+
+const renderPasswordReset = (req, res) => {
+    res.render('password_reset', { layout: 'pre_layout', script: 'account_password_reset' });
+}
+
+const renderPasswordChange = (req, res) => {
+    res.render('password_change', { layout: 'pre_layout', user: req.user, script: 'account_password_change' });
+}
+
+module.exports = {
+    register, login, logout, passwordReset, passwordChange, passwordUpdate, resendMail,
+    getAll, getByID, update, remove, uploadAvt, renderProfile, renderList, renderRegister, renderLogin,
+    renderPasswordReset, renderPasswordChange
+};

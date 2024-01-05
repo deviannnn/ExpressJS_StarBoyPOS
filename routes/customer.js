@@ -1,30 +1,26 @@
 var express = require('express');
 var router = express.Router();
 
-const customerController = require('../controllers/customer');
+const controller = require('../controllers/customer');
 const { validate, checkCustomer, checkUCustomer } = require('../middlewares/validate');
 const { isAdmin } = require('../middlewares/auth');
 
-const title = 'Customers';
+router.get('/', controller.renderList);
 
-router.get('/', customerController.renderCustomerList);
+router.get('/register', controller.renderRegister);
 
-router.get('/register', function (req, res) {
-  res.render('customer_register', { title: title, subTitle: 'New Customer', script: 'customer_register' });
-});
+router.post('/register', [checkCustomer, validate], controller.register);
 
-router.post('/register', [checkCustomer, validate], customerController.register);
+router.post('/get', controller.getByID);
 
-router.post('/get', customerController.getByID);
+router.post('/getAll', controller.getAll);
 
-router.post('/getAll', customerController.getAll);
+router.put('/update', [checkUCustomer, validate], controller.update);
 
-router.put('/update', [checkUCustomer, validate], customerController.update);
-
-router.post('/search', customerController.search);
+router.post('/search', controller.search);
 
 router.use(isAdmin);
 
-router.delete('/remove', customerController.remove);
+router.delete('/remove', controller.remove);
 
 module.exports = router;

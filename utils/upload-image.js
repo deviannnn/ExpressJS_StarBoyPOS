@@ -24,20 +24,16 @@ const storage = multer.diskStorage({
     filename: function (req, file, cb) {
         const root = req.root.folder;
 
-        let settingName = file.originalname;
+        const fileExtension = path.extname(file.originalname);
+        let fileName = path.basename(file.originalname, fileExtension);
 
-        if (root === 'account') {
-            settingName = req.body.Id;
-        } else if (root === 'product_variant') {
-            if (req.body.newbarcode !== undefined) {
-                settingName = req.body.newbarcode;
-            }
-            else {
-                settingName = req.body.barcode;
-            }
+        if (root === 'accounts') {
+            fileName = req.body.Id;
+        } else if (root === 'product_variants') {
+            fileName = req.body.barcode;
         }
 
-        cb(null, Date.now() + '-' + settingName);
+        cb(null, `${fileName}-${Date.now()}${fileExtension}`);
     },
 });
 

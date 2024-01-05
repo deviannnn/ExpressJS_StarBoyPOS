@@ -1,16 +1,16 @@
 var express = require('express');
 var router = express.Router();
 
-const variantController = require('../controllers/variant');
+const controller = require('../controllers/variant');
 const upload = require('../utils/upload-image');
 const { validate, checkVariant, checkUVariant } = require('../middlewares/validate');
 const { isAdmin } = require('../middlewares/auth');
 
-router.post('/getAllByProduct', variantController.getAllByProductID);
+router.post('/getAllByProduct', controller.getAllByProductID);
 
-router.post('/getByBarcode', variantController.getByBarcode);
+router.post('/getByBarcode', controller.getByBarcode);
 
-router.post('/search', variantController.search);
+router.post('/search', controller.search);
 
 router.use(isAdmin);
 
@@ -20,12 +20,12 @@ const setRootFolder = (req, res, next) => {
     next();
 }
 
-router.post('/uploadImg', setRootFolder, upload.single('img'), variantController.uploadImg);
+router.post('/uploadImg', setRootFolder, upload.single('img'), controller.uploadImg);
 
-router.post('/create', [checkVariant, validate], variantController.create);
+router.post('/create', [checkVariant, validate], controller.create);
 
-router.put('/update', [checkUVariant, validate], variantController.update);
+router.put('/update', [checkUVariant, validate], controller.update);
 
-router.delete('/remove', variantController.remove);
+router.delete('/remove', controller.remove);
 
 module.exports = router;

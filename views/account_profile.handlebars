@@ -6,8 +6,8 @@
     <div class="row gx-4">
         <div class="col-auto">
             <div class="avatar avatar-xl position-relative">
-                <img src="/uploads/accounts/{{profile.avatar}}" alt="profile_image"
-                    class="w-100 border-radius-lg shadow-sm">
+                <img class="w-100 border-radius-lg shadow-sm" src="/uploads/accounts/{{profile.avatar}}"
+                    alt="profile_image">
             </div>
         </div>
         <div class="col-auto my-auto">
@@ -20,8 +20,8 @@
             <div class="nav-wrapper position-relative end-0">
                 <ul class="nav nav-pills nav-fill p-1 bg-transparent" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link mb-0 px-0 py-1 active " data-bs-toggle="tab" href="" role="tab"
-                            aria-selected="true">
+                        <a id="profileTab" class="nav-link mb-0 px-0 py-1 active " data-bs-toggle="tab" href=""
+                            role="tab" aria-selected="true">
                             <svg class="text-dark" width="16px" height="16px" viewBox="0 0 42 42" version="1.1"
                                 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                                 <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
@@ -47,11 +47,9 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link mb-0 px-0 py-1 " data-bs-toggle="tab" href="" role="tab"
-                            aria-selected="false">
+                        <a id="changeAvtTab" class="nav-link mb-0 px-0 py-1 " data-bs-toggle="tab" role="tab" aria-selected="false">
                             <svg class="text-dark" width="16px" height="16px" viewBox="0 0 40 40" version="1.1"
                                 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                                <title>settings</title>
                                 <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
                                     <g transform="translate(-2020.000000, -442.000000)" fill="#FFFFFF"
                                         fill-rule="nonzero">
@@ -71,7 +69,7 @@
                                     </g>
                                 </g>
                             </svg>
-                            <span class="ms-1">Change Password</span>
+                            <span class="ms-1">Change Avatar</span>
                         </a>
                     </li>
                 </ul>
@@ -185,7 +183,8 @@
                             <span id="cur-pw-err" class="ms-2 text-xxs text-danger"></span>
                         </label>
                         <div class="form-group">
-                            <input id="currentPassword" class="form-control" type="password" placeholder="Current password">
+                            <input id="currentPassword" class="form-control" type="password"
+                                placeholder="Current password">
                         </div>
                     </div>
                     <div class="col-4">
@@ -211,6 +210,31 @@
                 </ul>
                 <button class="btn bg-gradient-dark btn-sm float-end mt-4 mb-0" disabled id="updateBtn"
                     onclick="passwordUpdate()">Update password</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal Change Avt -->
+<div class="modal fade" id="changeAvtModal" tabindex="-1" role="dialog" style="--bs-modal-width: 350px;"
+    aria-labelledby="change-avt-modal" aria-hidden="true">
+    <div class="modal-dialog modal-danger modal-dialog-centered modal-" role="document">
+        <div class="modal-content">
+            <div class="modal-body p-4">
+                <div class="info text-center mb-5">
+                    <img id="previewChangeAvt" class="avatar avatar-xxl" src="/uploads/accounts/{{profile.avatar}}"
+                        alt="profile_image">
+                </div>
+                <div class="d-flex justify-content-center mt-4">
+                    <input type="text" id="accountId" value="{{profile.Id}}" hidden>
+                    <input type="file" id="avatar" accept=".png, .jpg" hidden>
+                    <button type="button" class="btn btn-outline-secondary mx-1 mb-0" onclick="chooseAvt()">
+                        No, Orther</button>
+                    <button type="button" id="changeAvtBtn" class="btn btn bg-gradient-dark mx-2 mb-0"
+                        onclick="uploadAvt()" disabled>Confirm</button>
+
+                </div>
             </div>
         </div>
     </div>

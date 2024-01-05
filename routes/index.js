@@ -3,38 +3,28 @@ var router = express.Router();
 const { loginLimiter, passwordResetLimiter } = require('../configs/ratelimit')
 
 const accountController = require('../controllers/account');
-const { authenticate, checkRevokedToken, isPasswordChange, isLoggedIn } = require('../middlewares/auth');
+const auth = require('../middlewares/auth');
+const { renderAvatar } = require('../middlewares/render');
 
-router.get('/login', function (req, res) {
-    res.render('login', { layout: 'pre_layout', script: 'account_login' });
-});
+router.get('/login', accountController.renderLogin);
 
 router.post('/login', loginLimiter, accountController.login);
 
-router.get('/password/reset', function (req, res) {
-    res.render('password_reset', { layout: 'pre_layout', script: 'account_password_reset' });
-});
+router.get('/password/reset', accountController.renderPasswordReset);
 
 router.post('/password/reset', passwordResetLimiter, accountController.passwordReset);
 
-router.use(authenticate);
+router.use(auth.authenticate);
 
-router.get('/password/change', isPasswordChange, function (req, res) {
-    res.render('password_change', { layout: 'pre_layout', user: req.user, script: 'account_password_change' });
-});
+router.get('/password/change', auth.isPasswordChange, accountController.renderPasswordChange);
 
-router.post('/password/change', isPasswordChange, accountController.passwordChange);
+router.post('/password/change', auth.isPasswordChange, accountController.passwordChange);
 
-router.use(checkRevokedToken, isLoggedIn);
+router.use(auth.checkRevokedToken, auth.isLoggedIn);
 
 router.post('/logout', accountController.logout);
 
-router.use((req, res, next) => {
-    res.locals.user = req.user;
-    res.locals.hello = req.session.hello;
-    delete req.session.hello;
-    next();
-});
+router.use(renderAvatar);
 
 router.get('/', (req, res) => { res.render('index', { title: 'Dashboard', script: 'dashboard' }) })
 
