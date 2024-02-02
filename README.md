@@ -9,19 +9,20 @@ StarBoyPOS is an Express.js-based Point of Sale (POS) system designed for store 
 - User Authentication: Secure login system with role-based access control.
 - Reporting: Generate reports on sales, inventory, and other metrics.
 
-## Getting Started
+## Getting Started 
+### *Dev Environment*
 
-To get started with StarBoyPOS, follow these steps:
+To get started with StarBoyPOS in **_Dev Environment_**, follow these steps:
 
 1. **Clone the Repository:**
 
    ```bash
-   git clone https://gitlab.duthu.net/S52000620/final_nodejs_posweb.git
+   git clone https://github.com/devilkun1/ExpressJS_StarBoyPOS.git
 
 2. **Install Dependencies:**
 
    ```bash
-   cd final_nodejs_posweb
+   cd ExpressJS_StarBoyPOS
    npm install
 
 3. **Run the Application:**
@@ -34,17 +35,28 @@ To get started with StarBoyPOS, follow these steps:
    ```bash
    localhost:3000
 
-**Account provided:**
+5. **Account provided:**
 
    ```bash
     Role: Admin
     username: admin
     password: admin
-
+   
     Role: Staff
     username: kunyanan11
     password: 123123Aa@
-
-   **NOTE:**
-    - Requires a stable network connection to connect to the database (Mongodb Atlas).
+   
+6. **Note**
+    - Requires a stable internet connection to connect to the database (Mongodb Atlas).
     - Install Nodejs (Latest LTS).
+  
+### *Production Environment*
+
+To get started with StarBoyPOS in **_Production Environment_**, visit the link: https://expressjsstarboypos-production.up.railway.app
+
+   **Account provided:**
+   ```bash
+    Role: Admin
+    username: admin
+    password: admin
+
