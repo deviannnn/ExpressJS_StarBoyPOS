@@ -6,6 +6,8 @@ const bcrypt = require('bcrypt');
 const get = require('lodash/get');
 const set = require('lodash/set');
 
+const domain = process.env.DOMAIN;
+
 const { generateJWT } = require('../utils/jwt');
 const { formatForBirthdayInput } = require('../utils/format');
 const { generateId } = require('../utils/auto-id');
@@ -345,7 +347,7 @@ const uploadAvt = async (req, res) => {
 }
 
 const sendPasswordChange = async (gmail, token, template) => {
-    const link = `http://localhost:3000/password/change?token=${token}`
+    const link = `${domain}/password/change?token=${token}`
     const mailSubject = template === register_mail ? 'Confirm your registration' : 'Confirm your password reset';
     let mailHtml = fs.readFileSync(template, 'utf8');
     mailHtml = `<p>${mailHtml.replace(/{{LINK_PLACEHOLDER}}/g, link)}</p>`;

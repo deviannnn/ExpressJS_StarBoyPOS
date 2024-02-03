@@ -25,17 +25,27 @@ To get started with StarBoyPOS in **_Dev Environment_**, follow these steps:
    cd ExpressJS_StarBoyPOS
    npm install
 
-3. **Run the Application:**
+3. **Add .env file:**
+
+   ```bash
+   SECRET_KEY=yJozZ6Ktk960mtt7l18eoOEUxEiRaOWw
+   SESSION_KEY=5mNLMNsfCHLvjobVmLKqcrMON8iB6X4G
+   MAIL_PASSWORD=rnbvordtpyvpxewu
+   DOMAIN=localhost:3000
+   DB_DEV_CONSTRING=mongodb+srv://admin:admin@lytuanan1911.jtassu8.mongodb.net/StarBoyPOS_dev?retryWrites=true&w=majority
+   DB_PROD_CONSTRING=mongodb+srv://admin:admin@lytuanan1911.jtassu8.mongodb.net/StarBoyPOS?retryWrites=true&w=majority
+
+4. **Run the Application:**
 
    ```bash
    npm start
 
-4. **Access & Test:**
+5. **Access & Test:**
 
    ```bash
    localhost:3000
 
-5. **Account provided:**
+6. **Account provided:**
 
    ```bash
     Role: Admin
@@ -46,17 +56,16 @@ To get started with StarBoyPOS in **_Dev Environment_**, follow these steps:
     username: kunyanan11
     password: 123123Aa@
    
-6. **Note**
+7. **_Note_**
     - Requires a stable internet connection to connect to the database (Mongodb Atlas).
     - Install Nodejs (Latest LTS).
   
 ### *Production Environment*
 
-To get started with StarBoyPOS in **_Production Environment_**, visit the link: [starboypos](https://expressjsstarboypos-production.up.railway.app)
+To get started with StarBoyPOS in **_Production Environment_**, visit the link: [starboypos](https://starboypos.up.railway.app)
 
    **Account provided:**
    ```bash
     Role: Admin
     username: admin
     password: admin
-
