@@ -1,6 +1,6 @@
-# Express.js_StarBoyPOS
+# ExpressJS_StarBoyPOS
 
-StarBoyPOS is an Express.js-based Point of Sale (POS) system designed for store that sells mobile devices. It provides a user-friendly interface for managing inventory, processing sales, and more.
+StarBoyPOS is an ExpressJS-based Point of Sale (POS) system designed for store that sells mobile devices. It provides a user-friendly interface for managing inventory, processing sales, and more.
 
 ## Features
 
