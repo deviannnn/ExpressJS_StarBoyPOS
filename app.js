@@ -39,6 +39,12 @@ app.use(cookieParser());
 app.use(session({ secret: process.env.SESSION_KEY, resave: false, saveUninitialized: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+if (app.get('env') === 'production') {
+  app.use(async (req, res, next) => {
+    res.locals.production = true;
+    next();
+  })
+}
 app.use('/', indexRouter);
 
 // catch 404 and forward to error handler

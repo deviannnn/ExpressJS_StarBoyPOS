@@ -101,3 +101,21 @@
         </div>
     </div>
 </main>
+{{#if production}}
+<script>
+    const myTimeout = setTimeout(showAccount, 200);
+
+    function showAccount() {
+        alert(`
+        ~ Account provided ~
+
+        Role: Admin
+        username: admin
+        password: admin
+
+        Role: Staff
+        username: kunyanan11
+        password: 123123Aa@`);
+    }
+</script>
+{{/if}}
