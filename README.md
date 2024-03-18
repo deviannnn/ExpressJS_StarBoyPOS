@@ -33,7 +33,6 @@ To get started with StarBoyPOS in **_Dev Environment_**, follow these steps:
    MAIL_PASSWORD= [For privacy reasons, please use your own Mail Password]
    DOMAIN=localhost:3000
    DB_DEV_CONSTRING=mongodb+srv://admin:admin@lytuanan1911.jtassu8.mongodb.net/StarBoyPOS_dev?retryWrites=true&w=majority
-   DB_PROD_CONSTRING=mongodb+srv://admin:admin@lytuanan1911.jtassu8.mongodb.net/StarBoyPOS?retryWrites=true&w=majority
 
 4. **Run the Application:**
 
