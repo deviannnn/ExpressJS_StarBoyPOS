@@ -62,9 +62,3 @@ To get started with StarBoyPOS in **_Dev Environment_**, follow these steps:
 ### *Production Environment*
 
 To get started with StarBoyPOS in **_Production Environment_**, visit the link: [starboypos](https://starboypos.up.railway.app)
-
-   **Account provided:**
-   ```bash
-    Role: Admin
-    username: admin
-    password: admin
